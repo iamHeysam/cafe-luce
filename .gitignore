@@ -1,0 +1,14 @@
+# Freebuff desktop app local data (SQLite databases)
+.freebuff/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log

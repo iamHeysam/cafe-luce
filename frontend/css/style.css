@@ -198,97 +198,105 @@ button {
   color: var(--brown);
 }
 
-/* دسته‌بندی‌ها */
+/* category */
+
 .categories {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.1rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-@media (min-width: 620px) {
-  .categories {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.category-btn {
+.category {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.3rem;
-  border: 2px solid var(--brown);
-  border-radius: var(--radius);
-  background: var(--card);
-  color: var(--brown);
-  cursor: pointer;
-  transition:
-    background-color var(--transition),
-    color var(--transition),
-    transform var(--transition),
-    box-shadow var(--transition);
+  flex-basis: 100%;
+  height: 62px;
+  border: 2px solid #634126;
+  background-color: #fff8e1;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  transition: all 200ms ease-in;
+  overflow: hidden;
 }
 
-.category-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-soft);
-}
-
-.category-btn:active {
-  transform: translateY(0);
-}
-
-.category-btn[aria-pressed="true"] {
-  background: var(--brown);
-  color: var(--cream);
-  box-shadow: var(--shadow-soft);
-}
-
-.category-btn__text {
+.category__right {
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.2rem;
-  transition: margin-top var(--transition);
+  width: 100%;
+  padding-left: 0.5rem;
+  transition: all 200ms ease-in;
 }
 
-.category-btn__title {
-  font-size: 1.9rem;
-  font-weight: 800;
-  transition: font-size var(--transition);
+.category__title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #634126;
+  transition: all 200ms ease-in;
 }
 
-.category-btn__example {
-  font-size: 1.3rem;
-  opacity: 0.85;
-  transition: opacity var(--transition), visibility var(--transition);
+.category__example {
+  font-weight: 500;
+  color: #6b4729da;
+  font-size: 1.2rem;
+  transition: all 200ms ease-in;
 }
 
-/* حالت انتخاب: عنوان بزرگ می‌شود و توضیح کاملاً محو می‌شود (مثل اول) */
-.category-btn[aria-pressed="true"] .category-btn__text {
+.category__left {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding-right: 0.5rem;
+  border-right: 2px solid #634126;
+  transition: all 200ms ease-in;
+}
+
+.category__icon {
+  width: 3rem;
+  height: 3rem;
+  transition: all 200ms ease-in;
+}
+
+.category__icon--fill {
+  fill: #634126;
+}
+
+.category__icon--stroke {
+  stroke: #634126;
+}
+
+.category.active {
+  background-color: #634126;
+}
+
+.category.active .category__right {
   margin-top: 1.8rem;
 }
 
-.category-btn[aria-pressed="true"] .category-btn__title {
+.category.active .category__right .category__title {
+  color: #fff5d4;
   font-size: 2.5rem;
   font-weight: 800;
 }
 
-.category-btn[aria-pressed="true"] .category-btn__example {
+.category.active .category__right .category__example {
   opacity: 0;
   visibility: hidden;
 }
 
-.category-btn__icon {
-  width: 3.2rem;
-  height: 3.2rem;
-  flex-shrink: 0;
+.category.active .category__left {
+  border-color: #fff5d4;
 }
 
-.category-btn__icon svg {
-  width: 100%;
-  height: 100%;
-  display: block;
+.category.active .category__left .category__icon--fill {
+  fill: #fff5d4;
+}
+
+.category.active .category__left .category__icon--stroke {
+  stroke: #fff5d4;
 }
 
 /* آیتم‌های منو */
@@ -303,6 +311,7 @@ button {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   gap: 1rem;
   padding: 1.8rem 1.6rem;
   background: var(--card);
@@ -319,7 +328,6 @@ button {
 }
 
 .menu-item__price {
-  margin-top: auto;
   padding: 0.35rem 1.1rem;
   border: 1px solid rgba(99, 65, 38, 0.2);
   border-radius: 999px;
@@ -357,120 +365,113 @@ button {
   }
 }
 
-/* ---------- فوتر ---------- */
+/* Footer */
+
 .footer {
-  margin-top: 4rem;
-  padding: 3rem 0 3.4rem;
-  background: var(--white);
-  border-radius: 2.4rem 2.4rem 0 0;
-  box-shadow: 0 -4px 14px rgba(59, 37, 24, 0.12);
+  padding: 2rem;
+  border-radius: 2rem;
+  box-shadow: 0 -5px 10px 0px rgba(59, 37, 24, 0.1);
+  background-color: #fff;
+  margin: 0 1rem;
+  margin-bottom: 2rem;
 }
 
-.footer__contact {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.6rem;
-  padding-bottom: 2.4rem;
-  margin-bottom: 2.4rem;
-  border-bottom: 1px solid rgba(71, 54, 40, 0.2);
+.about {
+  display: flex;
+  justify-content: space-between;
+  direction: ltr;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #473628;
+  margin-bottom: 2rem;
 }
 
-@media (min-width: 720px) {
-  .footer__contact {
-    grid-template-columns: 1fr 1fr;
-  }
+.instagram {
+  width: 50%;
+  border-right: 1px solid #6b4729b7;
 }
 
-.contact-card {
+.instagram__link {
   display: flex;
   align-items: center;
-  gap: 1.2rem;
-  padding: 1.5rem;
-  background: var(--card);
-  border: 1px solid rgba(99, 65, 38, 0.15);
-  border-radius: var(--radius);
+  column-gap: 1rem;
+  text-decoration: none;
 }
 
-a.contact-card {
-  transition:
-    transform var(--transition),
-    box-shadow var(--transition);
+.instagram__wrapper-icon {
+  height: 60px;
+  width: 60px;
 }
 
-a.contact-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-soft);
+.instagram__text {
+  color: #473628;
+  font-weight: 800;
 }
 
-.contact-card__icon {
+.instagram__id {
+  font-size: 1.4rem;
+  color: #ce2b37;
+}
+
+.instagram__icon {
+  width: 60px;
+  height: 60px;
+}
+
+.numbers {
+  width: 50%;
+}
+
+.number {
+  display: flex;
+  align-items: center;
+  column-gap: 0.5rem;
+  text-decoration: none;
+}
+
+.numbers__wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  row-gap: 0.5rem;
+  padding-left: 1rem;
+}
+
+.numbers__icon-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 4.4rem;
-  height: 4.4rem;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: rgba(0, 146, 70, 0.12);
-  color: var(--green);
+  border-radius: 100%;
+  background-color: #00924727;
+  width: 25px;
+  height: 25px;
 }
 
-.contact-card__icon svg {
-  width: 2.4rem;
-  height: 2.4rem;
+.numbers__icon {
+  width: 15px;
+  height: 15px;
+  fill: #009246;
 }
 
-.contact-card__label {
-  display: block;
-  font-size: 1.3rem;
+.number__text {
+  color: #473628;
   font-weight: 600;
-  color: var(--brown-muted);
-}
-
-.contact-card__value {
-  display: block;
-  font-size: 1.9rem;
-  font-weight: 800;
-  color: var(--brown-dark);
-}
-
-.contact-card__value--accent {
-  color: var(--red);
-}
-
-.phones {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.phone {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: var(--brown-dark);
-  direction: ltr;
-}
-
-.phone:hover {
-  color: var(--green);
-}
-
-.footer__map {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
 }
 
 .map {
+  min-width: 300px;
+  max-height: 300px;
   width: 100%;
-  height: 280px;
-  border: 0;
-  border-radius: var(--radius);
+  height: 300px;
+  border-radius: 2rem;
 }
 
-.footer__address {
+.location__text {
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: #473628;
   text-align: center;
-  font-size: 1.5rem;
-  color: var(--brown-muted);
+  margin-top: 0.5rem;
 }
 
 /* ---------- دسترس‌پذیری ---------- */

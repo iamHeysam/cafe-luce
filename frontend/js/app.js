@@ -19,62 +19,55 @@
       label: "بار سرد بر پایه اسپرسو",
       icon: "espressoCold",
     },
-    { id: "hotDrinks", label: "نوشیدنی گرم و دمنوش", icon: "teapot" },
+    { id: "hotDrinks", label: "نوشیدنی گرم و دمنوش", icon: "frenchPress" },
     { id: "coldDrink", label: "نوشیدنی سرد", icon: "coldGlass" },
   ];
 
   const MENU = {
     spressoHotBased: [
-      { name: "اسپرسو سینگل", price: 1989889 },
-      { name: "اسپرسو دبل", price: 1 },
-      { name: "ماکیاتو", price: 1 },
-      { name: "اسپرسو رومانو", price: 1 },
-      { name: "اسپرسو کُن‌پانا", price: 1 },
-      { name: "اسپرسو کُن‌کانلا", price: 1 },
-      { name: "اسپرسو بوم بُن", price: 1 },
-      { name: "امریکانو", price: 1 },
-      { name: "لاته", price: 1 },
-      { name: "موکا", price: 1 },
-      { name: "کارامل ماکیاتو", price: 1 },
-      { name: "کاپوچینو", price: 1 },
-      { name: "وانیلا لاته", price: 1 },
-      { name: "هاتزل لاته", price: 1 },
-      { name: "سینامون لاته", price: 1 },
-      { name: "لوتوس لاته", price: 1 },
-      { name: "دالگونا", price: 1 },
+      "اسپرسو سینگل",
+      "اسپرسو دبل",
+      "ماکیاتو",
+      "اسپرسو رومانو",
+      "اسپرسو کُن‌پانا",
+      "اسپرسو کُن‌کانلا",
+      "اسپرسو بوم بُن",
+      "امریکانو",
+      "لاته",
+      "موکا",
+      "کارامل ماکیاتو",
+      "کاپوچینو",
+      "وانیلا لاته",
+      "هاتزل لاته",
+      "سینامون لاته",
+      "لوتوس لاته",
+      "دالگونا",
     ],
     spressoColdBased: [
-      { name: "ایس امریکانو", price: 1 },
-      { name: "ایس لاته", price: 1 },
-      { name: "ایس کارامل ماکیاتو", price: 1 },
-      { name: "ایس موکا", price: 1 },
-      { name: "ایس وانیلا لاته", price: 1 },
-      { name: "ایس هاتزل لاته", price: 1 },
-      { name: "ایس لوتوس لاته", price: 1 },
-      { name: "ایس لاته دورو", price: 1 },
-      { name: "ایس لاته منتا", price: 1 },
-      { name: "افوگاتو", price: 1 },
+      "ایس امریکانو",
+      "ایس لاته",
+      "ایس کارامل ماکیاتو",
+      "ایس موکا",
+      "ایس وانیلا لاته",
+      "ایس هاتزل لاته",
+      "ایس لوتوس لاته",
+      "ایس لاته دورو",
+      "ایس لاته منتا",
+      "افوگاتو",
     ],
-    hotDrinks: [
-      { name: "چای", price: 1 },
-      { name: "هات چاکلت", price: 1 },
-      { name: "تی لاته زعفران پسته", price: 1 },
-      { name: "چای کرک", price: 1 },
-      { name: "چای ماسالا", price: 1 },
-      { name: "انواع دمنوش", price: 1 },
-    ],
+    hotDrinks: ["چای", "هات چاکلت", "تی لاته زعفران پسته", "چای کرک", "چای ماسالا", "انواع دمنوش"],
     coldDrink: [
-      { name: "موهيتو كلاسيک", price: 1 },
-      { name: "موهيتو فراگولا", price: 1 },
-      { name: "موهيتو ويولا", price: 1 },
-      { name: "موهيتو كوييک", price: 1 },
-      { name: "موهيتو دورو", price: 1 },
-      { name: "مارين", price: 1 },
-      { name: "جنوا", price: 1 },
-      { name: "ورونا", price: 1 },
-      { name: "فلورنزا", price: 1 },
-      { name: "روما سان ست", price: 1 },
-      { name: "ترنتينو", price: 1 },
+      "موهيتو كلاسيک",
+      "موهيتو فراگولا",
+      "موهيتو ويولا",
+      "موهيتو كوييک",
+      "موهيتو دورو",
+      "مارين",
+      "جنوا",
+      "ورونا",
+      "فلورنزا",
+      "روما سان ست",
+      "ترنتينو",
     ],
   };
 
@@ -90,15 +83,21 @@
         stroke-width="10" aria-hidden="true">
         <path d="M132.067,274.271c-4.418,0-8,3.582-8,8v32.409c0,4.418,3.582,8,8,8h32.409c4.418,0,8-3.582,8-8v-32.409c0-4.418-3.582-8-8-8 H132.067z M156.476,306.681h-16.409v-16.409h16.409V306.681z M256.232,0c-29.789,0-54.024,24.236-54.024,54.026v1.015h-64.75 l-2.591-43.791c-0.261-4.411-4.053-7.76-8.458-7.514c-4.411,0.262-7.774,4.048-7.513,8.459l2.535,42.846H90.396 c-2.2,0-4.303,0.906-5.813,2.504c-1.511,1.599-2.297,3.749-2.174,5.945l16.196,287.771v33.395c0,4.418,3.582,8,8,8h133.577 c4.418,0,8-3.582,8-8v-33.395l11.625-206.517c0.249-4.411-3.126-8.188-7.538-8.437c-4.401-0.243-8.188,3.126-8.437,7.538 l-11.212,199.19H114.167l-12.189-216.571h23.678l6.938,117.246c0.261,4.41,4.045,7.754,8.458,7.514 c4.411-0.262,7.774-4.048,7.513-8.459l-6.881-116.301h34.536c4.418,0,8-3.582,8-8s-3.582-8-8-8h-35.483l-2.333-39.425h63.803v1.396 c0,29.79,24.235,54.026,54.024,54.026c29.791,0,54.028-24.236,54.028-54.026V54.026C310.26,24.236,286.023,0,256.232,0z M114.605,359.037h117.577v17.619H114.605V359.037z M101.078,110.466l-2.219-39.425h23.518l2.333,39.425H101.078z M240.201,106.917 c-12.979-6.06-21.993-19.236-21.993-34.479V54.026c0-19.837,15.268-36.174,34.668-37.88c8.04,10.366,7.073,29.669-2.685,41.844 c-7.291,9.096-11.649,21.282-11.958,33.433C238.095,96.919,238.77,102.135,240.201,106.917z M294.26,72.438 c0,19.839-15.271,36.179-34.677,37.88c-8.901-11.217-6.097-30.854,3.093-42.321c10.053-12.543,14.491-32.112,9.617-48.437 c12.964,6.065,21.967,19.235,21.967,34.467V72.438z M192.892,287.157c0.048,0.001,0.095,0.001,0.143,0.001 c2.07,0,4.063-0.803,5.555-2.243l23.323-22.503c1.527-1.473,2.406-3.492,2.444-5.613c0.038-2.122-0.768-4.172-2.241-5.698 l-22.503-23.323c-3.068-3.179-8.132-3.271-11.312-0.202l-23.323,22.502c-1.527,1.473-2.406,3.492-2.444,5.613 c-0.038,2.122,0.768,4.171,2.241,5.698l22.503,23.324C188.751,286.24,190.77,287.119,192.892,287.157z M193.652,244.644 l11.394,11.81l-11.809,11.394l-11.394-11.81L193.652,244.644z" />
       </svg>`,
-    teapot: `
-      <svg class="category__icon category__icon--fill" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 4.5a8 8 0 0 0-8 8v.3c0 1.5 1.2 2.7 2.7 2.7h10.6c1.5 0 2.7-1.2 2.7-2.7v-.3a8 8 0 0 0-8-8z" />
-        <path d="M11.2 4.5h1.6V3.4a.8.8 0 0 0-1.6 0v1.1z" />
-        <path d="M4.2 10.4L1.2 13l3 2.6v-5.2z" />
-        <path d="M19.8 10.4c2 0 3.2 1.2 3.2 2.6s-1.2 2.6-3.2 2.6v-5.2z" />
-        <path d="M7.2 15.5h9.6v1.4c0 1-.8 1.8-1.8 1.8H9c-1 0-1.8-.8-1.8-1.8v-1.4z" />
-        <path d="M9.6 3.2c.8.6.8 1.4 0 2-.8-.6-.8-1.4 0-2z" />
-        <path d="M14.4 3.2c.8.6.8 1.4 0 2-.8-.6-.8-1.4 0-2z" />
+    frenchPress: `
+      <svg class="category__icon category__icon--stroke" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <g transform="translate(4.000000, 4.000000)">
+          <g transform="translate(4.000000, 3.352941)">
+            <path d="M9,-0.352941176 L-1,-0.352941176 L-1,10.6470588 C-1,11.1993436 -0.776142375,11.6993436 -0.414213562,12.0612724 C-0.0522847498,12.4232012 0.44771525,12.6470588 1,12.6470588 L7,12.6470588 C7.55228475,12.6470588 8.05228475,12.4232012 8.41421356,12.0612724 C8.77614237,11.6993436 9,11.1993436 9,10.6470588 L9,-0.352941176 Z" />
+            <path d="M10,2.64705882 L11,2.64705882 C11.5522847,2.64705882 12,3.09477407 12,3.64705882 L12,6.64705882" />
+          </g>
+          <line x1="3" x2="13" y1="6.23529412" y2="6.23529412" />
+          <g stroke-linecap="round" stroke-linejoin="round">
+            <line x1="0" x2="3" y1="3" y2="3" />
+            <line x1="8" x2="8" y1="1" y2="13" />
+            <line x1="7" x2="9" y1="0.5" y2="0.5" />
+          </g>
+          <line x1="6" x2="10" y1="13" y2="13" />
+        </g>
       </svg>`,
     coldGlass: `
       <svg class="category__icon category__icon--fill" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
@@ -109,15 +108,6 @@
   /* ---------- توابع کمکی ---------- */
 
   const $ = (selector, root = document) => root.querySelector(selector);
-
-  /**
-   * قیمت را برای نمایش آماده می‌کند.
-   * قیمت‌های placeholder (۱) هنوز ثبت نشده‌اند؛ نمایش داده نمی‌شوند.
-   */
-  function formatPrice(price) {
-    if (!Number.isFinite(price) || price <= 1) return null;
-    return `${price.toLocaleString("fa-IR")} تومان`;
-  }
 
   /* ---------- رندر ---------- */
 
@@ -130,8 +120,8 @@
   function categoryExample(id) {
     const items = MENU[id];
     if (!items || items.length === 0) return "";
-    const first = items[0].name;
-    const second = items[1] ? items[1].name : null;
+    const first = items[0];
+    const second = items[1] ? items[1] : null;
     return second ? `${first}، ${second} و ...` : first;
   }
 
@@ -176,24 +166,15 @@
       return;
     }
 
-    items.forEach((item) => {
+    items.forEach((name) => {
       const li = document.createElement("li");
       li.className = "menu-item";
 
-      const name = document.createElement("span");
-      name.className = "menu-item__name";
-      name.textContent = item.name;
+      const nameEl = document.createElement("span");
+      nameEl.className = "menu-item__name";
+      nameEl.textContent = name;
 
-      li.append(name);
-
-      const priceText = formatPrice(item.price);
-      if (priceText) {
-        const price = document.createElement("span");
-        price.className = "menu-item__price";
-        price.textContent = priceText;
-        li.append(price);
-      }
-
+      li.append(nameEl);
       menuList.append(li);
     });
   }
@@ -208,6 +189,23 @@
     });
 
     buildMenu(categoryId);
+
+    /* اسکرول خودکار به منو: منو با فاصلهٔ ۹۰px (ارتفاع هدر کوچک) از بالای صفحه
+       می‌ایستد. اگر هدر هنوز بزرگ است، هنگام اسکرول کوچک می‌شود و محتوا ۳۰px
+       جابه‌جا می‌شود؛ این اختلاف را جبران می‌کنیم تا منو همیشه یک‌جا بایستد. */
+    requestAnimationFrame(() => {
+      const style = getComputedStyle(document.documentElement);
+      const base = parseFloat(style.fontSize);
+      const shrunkH =
+        parseFloat(style.getPropertyValue("--header-h-shrunk")) * base;
+      const shrinkShift = Math.max(0, header.offsetHeight - shrunkH);
+      const menuTop = menuList.getBoundingClientRect().top + window.scrollY;
+
+      window.scrollTo({
+        top: Math.max(0, menuTop - shrunkH - 10 - shrinkShift),
+        behavior: "smooth",
+      });
+    });
   }
 
   categoriesNav.addEventListener("click", (event) => {

@@ -327,16 +327,6 @@ button {
   color: var(--brown-dark);
 }
 
-.menu-item__price {
-  padding: 0.35rem 1.1rem;
-  border: 1px solid rgba(99, 65, 38, 0.2);
-  border-radius: 999px;
-  background: var(--cream);
-  font-size: 1.7rem;
-  font-weight: 800;
-  color: var(--brown);
-}
-
 .menu-empty {
   grid-column: 1 / -1;
   padding: 3rem;

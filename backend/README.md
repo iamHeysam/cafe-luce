@@ -1,9 +1,9 @@
-# کافه لوچه — بک‌اند API (مرحله ۱)
+# کافه لوچه — بک‌اند API
 
 REST API با **Node.js + Express + MongoDB** (Mongoose).
 
-**مرحله ۱ (فعلی): فقط GET** — محصولات و دسته‌بندی‌ها را می‌دهد.
-مرحله بعدی: POST (افزودن)، PUT/PATCH (ویرایش)، DELETE (حذف).
+**قابلیت‌ها:** خواندن عمومی (GET) + مدیریت کامل (POST/PATCH/DELETE) با ورود مبتنی بر رمز.
+سایت عمومی فقط از GET استفاده می‌کند؛ عملیات تغییر با توکن ورود محافظت می‌شوند.
 
 ## پیش‌نیازها
 
@@ -135,14 +135,35 @@ curl -X PATCH http://localhost:5000/api/categories/<شناسهٔ دسته> \
 
 ```
 backend/
-├── server.js          ← نقطهٔ شروع: Express + اتصال MongoDB
+├── server.js          ← نقطهٔ شروع: Express + اتصال MongoDB + محافظت از عملیات تغییر
 ├── seed.js            ← پر کردن دیتابیس با دادهٔ نمونه
 ├── models/
 │   ├── Category.js    ← مدل دسته‌بندی
 │   └── Product.js     ← مدل محصول
 └── routes/
-    ├── categories.js  ← GET /api/categories
-    └── products.js    ← GET /api/products و GET /api/products/:id
+    ├── auth.js        ← POST /api/login + میان‌افزار requireAuth (توکن)
+    ├── categories.js  ← GET/POST/PATCH/DELETE /api/categories
+    └── products.js    ← GET/POST/PATCH/DELETE /api/products
+```
+
+## پنل مدیریت
+
+پنل گرافیکی در `frontend/panel.html` است (همراه با `frontend/js/panel.js` و `frontend/css/panel.css`).
+با رمز پنل وارد می‌شود و دسته‌ها و آیتم‌های منو را مستقیماً از همین API مدیریت می‌کند:
+افزودن، ویرایش و حذف دسته و محصول، به‌همراه دکمهٔ خروجی JSON و بازنشانی به دادهٔ پیش‌فرض.
+
+## ساختار پروژه فرانت‌اند
+
+```
+frontend/
+├── index.html         ← سایت عمومی منو
+├── panel.html         ← پنل مدیریت (نیازمند رمز)
+├── css/
+│   ├── style.css      ← استایل سایت
+│   └── panel.css      ← استایل پنل مدیریت
+└── js/
+    ├── app.js         ← منطق سایت (خواندن از API + fallback)
+    └── panel.js       ← منطق پنل (ورود + مدیریت از طریق API)
 ```
 
 ## شکل خروجی

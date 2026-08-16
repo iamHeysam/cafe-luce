@@ -3,15 +3,21 @@
    ------------------------------------------------
    مدیریت دسته‌بندی‌ها و آیتم‌های منو (افزودن / ویرایش / حذف).
 
-   لایهٔ داده فعلاً localStorage است تا پنل بدون بک‌اند کار کند.
-   وقتی API بک‌اند آماده شد، فقط توابع store.load / store.save
-   با fetch جایگزین می‌شوند و بقیهٔ پنل دست نمی‌خورد.
+   لایهٔ داده به بک‌اند وصل است (REST API روی http://localhost:5000):
+   - خواندن:  GET  /api/categories و /api/products
+   - نوشتن:   POST / PATCH / DELETE با توکن ورود (Bearer)
+   همهٔ عملیات تغییر از طریق API انجام می‌شود و مستقیم در MongoDB
+   ذخیره می‌شود؛ سایت هم همان داده را نمایش می‌دهد.
    ========================================================= */
 
 (() => {
   "use strict";
 
-  const STORAGE_KEY = "luce-panel-data-v1";
+  const API_BASE = "http://localhost:5000";
+  const TOKEN_KEY = "luce-panel-token";
+
+  /* ---------- ابزار ---------- */
+  const $ = (selector, root = document) => root.querySelector(selector);
 
   /* ---------- آیکون‌ها — همان ۴ آیکون سایت ---------- */
   const ICONS = {
@@ -47,20 +53,15 @@
       </svg>`,
   };
 
-  /* ---------- ابزار ---------- */
-  const uid = () =>
-    "id-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  /* ---------- داده‌های پیش‌فرض (برای دکمهٔ «بازنشانی») ---------- */
+  const DEFAULT_CATEGORIES = [
+    { id: "spressoHotBased", label: "بار گرم بر پایه اسپرسو", icon: "espressoHot" },
+    { id: "spressoColdBased", label: "بار سرد بر پایه اسپرسو", icon: "espressoCold" },
+    { id: "hotDrinks", label: "نوشیدنی گرم و دمنوش", icon: "frenchPress" },
+    { id: "coldDrink", label: "نوشیدنی سرد", icon: "coldGlass" },
+  ];
 
-  function toItems(menu) {
-    const out = {};
-    Object.entries(menu).forEach(([categoryId, names]) => {
-      out[categoryId] = names.map((name) => ({ id: uid(), name }));
-    });
-    return out;
-  }
-
-  /* ---------- داده‌های پیش‌فرض (مثل منوی فعلی سایت) ---------- */
-  const DEFAULT_MENU = {
+  const DEFAULT_ITEMS = {
     spressoHotBased: [
       "اسپرسو سینگل",
       "اسپرسو دبل",
@@ -108,81 +109,133 @@
     ],
   };
 
-  const DEFAULT_DATA = {
-    categories: [
-      { id: "spressoHotBased", label: "بار گرم بر پایه اسپرسو", icon: "espressoHot" },
-      { id: "spressoColdBased", label: "بار سرد بر پایه اسپرسو", icon: "espressoCold" },
-      { id: "hotDrinks", label: "نوشیدنی گرم و دمنوش", icon: "frenchPress" },
-      { id: "coldDrink", label: "نوشیدنی سرد", icon: "coldGlass" },
-    ],
-    items: toItems(DEFAULT_MENU),
-  };
+  /* ---------- لایهٔ API ---------- */
 
-  /* ---------- ابزار ---------- */
-  const $ = (selector, root = document) => root.querySelector(selector);
-  const clone = (value) => JSON.parse(JSON.stringify(value));
-
-  /* دادهٔ بارگذاری‌شده را نرمال می‌کند (آیتم‌های قدیمیِ رشته‌ای هم قبول می‌شوند) */
-  function normalizeData(raw) {
-    const d = {
-      categories: Array.isArray(raw?.categories) ? raw.categories : [],
-      items: raw?.items && typeof raw.items === "object" ? raw.items : {},
-    };
-    Object.values(d.items).forEach((arr) => {
-      if (Array.isArray(arr)) {
-        arr.forEach((it, i) => {
-          if (typeof it === "string") arr[i] = { id: uid(), name: it };
-        });
-      }
-    });
-    return d;
+  class ApiError extends Error {
+    constructor(message, status) {
+      super(message);
+      this.status = status;
+    }
   }
 
-  /* ---------- لایهٔ داده (محل تعویض با API) ----------
-     فعلاً localStorage؛ وقتی API آماده شد:
-     store.load  → fetch("/api/menu").then(r => r.json())
-     store.save  → fetch("/api/menu", { method: "PUT", body: JSON.stringify(data) })
-  */
-  const store = {
-    async load() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : null;
-      } catch {
-        return null;
+  const getToken = () => sessionStorage.getItem(TOKEN_KEY) || "";
+
+  /* هر درخواست به API — توکن را خودکار در هدر می‌گذارد و خطا را فارسی می‌کند */
+  async function api(path, options = {}) {
+    const headers = { ...(options.headers || {}) };
+    const token = getToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+    if (options.body) headers["Content-Type"] = "application/json";
+
+    let res;
+    try {
+      res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+    } catch {
+      throw new ApiError("اتصال به سرور برقرار نیست");
+    }
+
+    let result = null;
+    try {
+      result = await res.json();
+    } catch {
+      /* پاسخ بدون JSON */
+    }
+
+    if (res.status === 401) {
+      lockPanel();
+      throw new ApiError(result?.error || "برای این عملیات باید دوباره وارد شوید", 401);
+    }
+    if (!res.ok) {
+      throw new ApiError(result?.error || "خطا در ارتباط با سرور", res.status);
+    }
+    return result;
+  }
+
+  /* خواندن دسته‌ها و محصولات از API و تبدیل به شکل داخلی پنل */
+  async function loadData() {
+    const [categories, products] = await Promise.all([
+      api("/api/categories"),
+      api("/api/products"),
+    ]);
+
+    const items = {};
+    categories.forEach((c) => (items[c.id] = []));
+    products.forEach((p) => {
+      if (p.category && items[p.category.id]) {
+        items[p.category.id].push({ id: p.id, name: p.name });
       }
-    },
-    async save(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    },
-  };
+    });
+
+    return {
+      categories: categories.map((c) => ({
+        id: c.id,
+        label: c.name,
+        icon: c.icon,
+        hidden: c.hidden,
+      })),
+      items,
+    };
+  }
+
+  /* ---------- عملیات API ---------- */
+  const createCategory = (name, icon) =>
+    api("/api/categories", { method: "POST", body: JSON.stringify({ name, icon }) });
+  const updateCategory = (id, fields) =>
+    api(`/api/categories/${id}`, { method: "PATCH", body: JSON.stringify(fields) });
+  const removeCategory = (id) => api(`/api/categories/${id}`, { method: "DELETE" });
+  const createProduct = (name, category) =>
+    api("/api/products", { method: "POST", body: JSON.stringify({ name, category }) });
+  const updateProduct = (id, fields) =>
+    api(`/api/products/${id}`, { method: "PATCH", body: JSON.stringify(fields) });
+  const removeProduct = (id) => api(`/api/products/${id}`, { method: "DELETE" });
+
+  /* بعد از هر تغییر، داده‌ها دوباره از API خوانده می‌شوند تا همیشه با سایت هماهنگ باشند */
+  async function refresh() {
+    data = await loadData();
+    if (!data.categories.some((c) => c.id === activeCategoryId)) {
+      activeCategoryId = data.categories[0]?.id ?? null;
+    }
+    renderAll();
+  }
+
+  async function runOperation(operation, successMessage) {
+    try {
+      await operation();
+      await refresh();
+      if (successMessage) toast(successMessage);
+    } catch (err) {
+      toast(err.message || "خطا در انجام عملیات", "error", 4000);
+    }
+  }
 
   /* ---------- ورود به پنل (فقط رمز) ---------- */
-  const API_BASE = "http://localhost:5000";
-  const TOKEN_KEY = "luce-panel-token";
+  let loginBound = false;
+
+  function lockPanel() {
+    sessionStorage.removeItem(TOKEN_KEY);
+    document.body.classList.add("is-locked");
+    bindLoginForm();
+  }
 
   function bindLoginForm() {
+    if (loginBound) return;
+    loginBound = true;
+
     const form = $("#login-form");
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const password = $("#login-password").value;
       try {
-        const res = await fetch(`${API_BASE}/api/login`, {
+        const res = await api("/api/login", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ password }),
         });
-        if (!res.ok) {
-          // خطا را با toast نشان می‌دهیم — بعد از ۳ ثانیه خودش محو می‌شود
-          toast("رمز اشتباه است", "error", 3000);
-          return;
-        }
-        const result = await res.json();
-        sessionStorage.setItem(TOKEN_KEY, result.token);
+        sessionStorage.setItem(TOKEN_KEY, res.token);
         document.body.classList.remove("is-locked");
         $("#login-password").value = "";
-      } catch {
-        toast("اتصال به سرور برقرار نیست", "error", 3000);
+        toast("خوش آمدید");
+      } catch (err) {
+        toast(err.message || "رمز اشتباه است", "error", 3000);
       }
     });
   }
@@ -213,7 +266,7 @@
   };
 
   const currentCategory = () =>
-    data.categories.find((c) => c.id === activeCategoryId) || null;
+    data?.categories.find((c) => c.id === activeCategoryId) || null;
 
   /* ---------- توست ---------- */
   let toastTimer = null;
@@ -251,7 +304,7 @@
 
     data.categories.forEach((category) => {
       const li = document.createElement("li");
-      li.className = "list-item";
+      li.className = "list-item" + (category.hidden ? " is-hidden" : "");
       li.dataset.id = category.id;
       li.title = "برای مشاهدهٔ آیتم‌ها کلیک کنید";
 
@@ -267,7 +320,8 @@
       const meta = document.createElement("span");
       meta.className = "list-item__meta";
       const count = (data.items[category.id] || []).length;
-      meta.textContent = count ? count + " آیتم" : "بدون آیتم";
+      const hiddenMark = category.hidden ? " · مخفی" : "";
+      meta.textContent = (count ? count + " آیتم" : "بدون آیتم") + hiddenMark;
       main.append(label, meta);
 
       const actions = document.createElement("div");
@@ -361,12 +415,6 @@
     renderItems();
   }
 
-  async function commit(message) {
-    await store.save(data);
-    renderAll();
-    if (message) toast(message);
-  }
-
   /* ---------- ویرایش درجا (inline) ---------- */
   function inlineEdit({ container, current, maxLength, onSave, onCancel }) {
     const wrapper = document.createElement("div");
@@ -414,19 +462,17 @@
   }
 
   /* ---------- عملیات دسته‌ها ---------- */
-  async function deleteCategory(category) {
+  function deleteCategory(category) {
     const count = (data.items[category.id] || []).length;
     const message = count
       ? `دستهٔ «${category.label}» همراه با ${count} آیتمش حذف شود؟`
       : `دستهٔ «${category.label}» حذف شود؟`;
     if (!confirm(message)) return;
 
-    data.categories = data.categories.filter((c) => c.id !== category.id);
-    delete data.items[category.id];
-    if (activeCategoryId === category.id) {
-      activeCategoryId = data.categories[0]?.id ?? null;
-    }
-    await commit(`دستهٔ «${category.label}» حذف شد.`);
+    runOperation(
+      () => removeCategory(category.id),
+      `دستهٔ «${category.label}» حذف شد.`
+    );
   }
 
   /* ---------- مودال افزودن دسته ---------- */
@@ -449,14 +495,16 @@
       container: row.querySelector(".list-item__label"),
       current: category.label,
       maxLength: 40,
-      onSave: async (value) => {
+      onSave: (value) => {
         if (!value) {
           toast("نام نمی‌تواند خالی باشد.", "error");
           renderCategories();
           return;
         }
-        category.label = value;
-        await commit("نام دسته به‌روزرسانی شد.");
+        runOperation(
+          () => updateCategory(category.id, { name: value }),
+          "نام دسته به‌روزرسانی شد."
+        );
       },
       onCancel: renderCategories,
     });
@@ -481,7 +529,7 @@
     });
 
     /* افزودن دسته */
-    els.categoryForm.addEventListener("submit", (event) => {
+    els.categoryForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const name = els.categoryName.value.trim();
       if (!name) {
@@ -493,12 +541,16 @@
         return;
       }
       const svg = els.categorySvg.value.trim();
-      const category = { id: uid(), label: name, icon: svg || "coldGlass" };
-      data.categories.push(category);
-      data.items[category.id] = [];
-      activeCategoryId = category.id;
       closeCategoryModal();
-      commit(`دستهٔ «${name}» اضافه شد.`);
+      try {
+        const created = await createCategory(name, svg || "coldGlass");
+        await refresh();
+        activeCategoryId = created.id;
+        renderAll();
+        toast(`دستهٔ «${name}» اضافه شد.`);
+      } catch (err) {
+        toast(err.message || "خطا در افزودن دسته", "error", 4000);
+      }
     });
 
     /* کلیک روی لیست دسته‌ها */
@@ -540,13 +592,15 @@
         toast("نام آیتم را وارد کنید.", "error");
         return;
       }
-      const items = data.items[category.id] || (data.items[category.id] = []);
+      const items = data.items[category.id] || [];
       if (items.some((i) => i.name === name)) {
         toast("این آیتم قبلاً در این دسته وجود دارد.", "error");
         return;
       }
-      items.push({ id: uid(), name });
-      commit(`«${name}» به دستهٔ «${category.label}» اضافه شد.`);
+      runOperation(
+        () => createProduct(name, category.id),
+        `«${name}» به دستهٔ «${category.label}» اضافه شد.`
+      );
       els.itemName.value = "";
       els.itemName.focus();
     });
@@ -562,10 +616,10 @@
 
       if (event.target.closest(".js-delete")) {
         if (confirm(`آیتم «${item.name}» حذف شود؟`)) {
-          data.items[category.id] = data.items[category.id].filter(
-            (i) => i.id !== item.id
+          runOperation(
+            () => removeProduct(item.id),
+            `«${item.name}» حذف شد.`
           );
-          commit(`«${item.name}» حذف شد.`);
         }
         return;
       }
@@ -575,14 +629,16 @@
           container: row.querySelector(".list-item__label"),
           current: item.name,
           maxLength: 60,
-          onSave: async (value) => {
+          onSave: (value) => {
             if (!value) {
               toast("نام نمی‌تواند خالی باشد.", "error");
               renderItems();
               return;
             }
-            item.name = value;
-            await commit("نام آیتم به‌روزرسانی شد.");
+            runOperation(
+              () => updateProduct(item.id, { name: value }),
+              "نام آیتم به‌روزرسانی شد."
+            );
           },
           onCancel: renderItems,
         });
@@ -605,7 +661,7 @@
       toast("خروجی JSON دانلود شد.");
     });
 
-    /* بازنشانی به پیش‌فرض */
+    /* بازنشانی به پیش‌فرض — حذف همه از API و ساخت دوبارهٔ داده‌های نمونه */
     els.resetBtn.addEventListener("click", async () => {
       if (
         !confirm(
@@ -614,9 +670,24 @@
       ) {
         return;
       }
-      data = clone(DEFAULT_DATA);
-      activeCategoryId = data.categories[0]?.id ?? null;
-      await commit("داده‌ها به حالت پیش‌فرض برگشت.");
+      els.resetBtn.disabled = true;
+      try {
+        for (const c of [...data.categories]) {
+          await removeCategory(c.id);
+        }
+        for (const cat of DEFAULT_CATEGORIES) {
+          const created = await createCategory(cat.label, cat.icon);
+          for (const name of DEFAULT_ITEMS[cat.id] || []) {
+            await createProduct(name, created.id);
+          }
+        }
+        await refresh();
+        toast("داده‌ها به حالت پیش‌فرض برگشت.");
+      } catch (err) {
+        toast(err.message || "خطا در بازنشانی داده‌ها", "error", 4000);
+      } finally {
+        els.resetBtn.disabled = false;
+      }
     });
   }
 
@@ -633,20 +704,20 @@
 
   /* ---------- شروع ---------- */
   (async function init() {
-    const saved = await store.load();
-    data = normalizeData(saved);
-    if (!data.categories.length) {
-      data = clone(DEFAULT_DATA);
-    }
-    activeCategoryId = data.categories[0]?.id ?? null;
     bindEvents();
-    renderAll();
 
-    /* درِ پنل — اگر توکن ورود نباشد، فرم رمز نمایش داده می‌شود */
     if (sessionStorage.getItem(TOKEN_KEY)) {
       document.body.classList.remove("is-locked");
     } else {
       bindLoginForm();
+    }
+
+    try {
+      data = await loadData();
+      activeCategoryId = data.categories[0]?.id ?? null;
+      renderAll();
+    } catch (err) {
+      toast(err.message || "اتصال به سرور برقرار نیست", "error", 4000);
     }
   })();
 })();

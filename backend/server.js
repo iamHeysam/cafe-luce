@@ -1,6 +1,6 @@
 /* =========================================================
    کافه لوچه — سرور API
-   مرحله ۱: فقط GET — محصولات و دسته‌بندی‌ها از MongoDB
+   خواندن عمومی (GET) + مدیریت (POST/PATCH/DELETE) با ورود
    ========================================================= */
 
 require("dotenv").config();
@@ -24,7 +24,6 @@ app.get("/", (req, res) => {
   res.json({
     name: "کافه لوچه API",
     version: "1.0.0",
-    مرحله: "۱ — فقط GET",
     endpoints: {
       "GET /api/products": "لیست همهٔ محصولات",
       "GET /api/products?category=<شناسهٔ دسته>": "محصولات یک دستهٔ خاص",
@@ -32,6 +31,7 @@ app.get("/", (req, res) => {
       "GET /api/categories": "لیست همهٔ دسته‌بندی‌ها",
       "POST /api/login": "ورود به پنل با رمز — توکن برمی‌گرداند",
     },
+    "عملیات تغییر (POST/PATCH/DELETE)": "نیازمند هدر Authorization: Bearer <token> هستند",
   });
 });
 

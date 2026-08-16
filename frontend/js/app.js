@@ -8,7 +8,8 @@
 
   /* ---------- داده‌ها ---------- */
 
-  const CATEGORIES = [
+  /* دادهٔ ثابت — فقط وقتی API در دسترس نباشد استفاده می‌شود (fallback) */
+  const FALLBACK_CATEGORIES = [
     {
       id: "spressoHotBased",
       label: "بار گرم بر پایه اسپرسو",
@@ -23,7 +24,7 @@
     { id: "coldDrink", label: "نوشیدنی سرد", icon: "coldGlass" },
   ];
 
-  const MENU = {
+  const FALLBACK_MENU = {
     spressoHotBased: [
       "اسپرسو سینگل",
       "اسپرسو دبل",
@@ -105,6 +106,57 @@
       </svg>`,
   };
 
+  /* ---------- اتصال به بک‌اند (API) ----------
+     ابتدا دسته‌ها و محصولات از API خوانده می‌شوند؛
+     اگر API در دسترس نبود، به دادهٔ ثابت برمی‌گردیم. */
+
+  // ⚠️ پورت 4000 توسط بک‌اند دیگری اشغال است — بک‌اند ما روی 5000 است
+  const API_BASE = "http://localhost:5000";
+
+  async function loadFromApi() {
+    const [categoriesRes, productsRes] = await Promise.all([
+      fetch(`${API_BASE}/api/categories`),
+      fetch(`${API_BASE}/api/products`),
+    ]);
+    if (!categoriesRes.ok || !productsRes.ok) {
+      throw new Error("API در دسترس نیست");
+    }
+
+    const categories = await categoriesRes.json();
+    const products = await productsRes.json();
+
+    // محصولات را به‌تفکیک دسته مرتب می‌کنیم
+    const menu = {};
+    categories.forEach((c) => {
+      menu[c.id] = [];
+    });
+    products.forEach((p) => {
+      if (p.category && menu[p.category.id]) {
+        menu[p.category.id].push({ id: p.id, name: p.name });
+      }
+    });
+
+    return {
+      categories: categories
+        .filter((c) => !c.hidden) // دسته‌های مخفی موقت در سایت نمایش داده نمی‌شوند
+        .map((c) => ({
+          id: c.id,
+          label: c.name,
+          icon: c.icon,
+        })),
+      menu,
+      fromApi: true,
+    };
+  }
+
+  function getFallbackData() {
+    const menu = {};
+    Object.entries(FALLBACK_MENU).forEach(([categoryId, names]) => {
+      menu[categoryId] = names.map((name) => ({ id: name, name }));
+    });
+    return { categories: FALLBACK_CATEGORIES, menu, fromApi: false };
+  }
+
   /* ---------- توابع کمکی ---------- */
 
   const $ = (selector, root = document) => root.querySelector(selector);
@@ -115,18 +167,18 @@
   const menuList = $("#menu-list");
   const header = $("#site-header");
 
-  let activeId = CATEGORIES[0].id;
+  let activeId = null;
 
   function categoryExample(id) {
-    const items = MENU[id];
+    const items = state.menu[id];
     if (!items || items.length === 0) return "";
     const first = items[0];
     const second = items[1] ? items[1] : null;
-    return second ? `${first}، ${second} و ...` : first;
+    return second ? `${first.name}، ${second.name} و ...` : first.name;
   }
 
   function buildCategoryButtons() {
-    CATEGORIES.forEach((category) => {
+    state.categories.forEach((category) => {
       const el = document.createElement("div");
       el.className = "category" + (category.id === activeId ? " active" : "");
       el.dataset.category = category.id;
@@ -146,7 +198,8 @@
 
       const left = document.createElement("div");
       left.className = "category__left";
-      left.innerHTML = ICONS[category.icon];
+      /* آیکون یا کلید آیکون‌های آماده است یا SVG خام که مستقیماً رندر می‌شود */
+      left.innerHTML = ICONS[category.icon] || category.icon || "";
 
       el.append(right, left);
       categoriesNav.append(el);
@@ -156,7 +209,7 @@
   function buildMenu(categoryId) {
     menuList.replaceChildren();
 
-    const items = MENU[categoryId] ?? [];
+    const items = state.menu[categoryId] ?? [];
 
     if (items.length === 0) {
       const empty = document.createElement("li");
@@ -166,13 +219,13 @@
       return;
     }
 
-    items.forEach((name) => {
+    items.forEach((item) => {
       const li = document.createElement("li");
       li.className = "menu-item";
 
       const nameEl = document.createElement("span");
       nameEl.className = "menu-item__name";
-      nameEl.textContent = name;
+      nameEl.textContent = item.name;
 
       li.append(nameEl);
       menuList.append(li);
@@ -276,7 +329,19 @@
 
   /* ---------- شروع ---------- */
 
-  buildCategoryButtons();
-  buildMenu(activeId);
-  measure();
+  let state = null;
+
+  (async function init() {
+    try {
+      state = await loadFromApi();
+    } catch {
+      state = getFallbackData();
+    }
+
+    activeId = state.categories[0]?.id ?? null;
+
+    buildCategoryButtons();
+    buildMenu(activeId);
+    measure();
+  })();
 })();

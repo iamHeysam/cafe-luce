@@ -8,6 +8,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 
+const { router: authRoutes, requireAuth } = require("./routes/auth");
 const categoryRoutes = require("./routes/categories");
 const productRoutes = require("./routes/products");
 
@@ -29,13 +30,22 @@ app.get("/", (req, res) => {
       "GET /api/products?category=<شناسهٔ دسته>": "محصولات یک دستهٔ خاص",
       "GET /api/products/:id": "یک محصول با شناسهٔ آن",
       "GET /api/categories": "لیست همهٔ دسته‌بندی‌ها",
+      "POST /api/login": "ورود به پنل با رمز — توکن برمی‌گرداند",
     },
   });
 });
 
 /* ---------- روت‌های API ---------- */
-app.use("/api/categories", categoryRoutes);
-app.use("/api/products", productRoutes);
+app.use("/api", authRoutes);
+
+/* عملیات تغییر (افزودن/ویرایش/حذف) فقط با توکن ورود اجرا می‌شوند؛
+   GET ها برای سایت عمومی می‌مانند */
+const WRITE_METHODS = ["POST", "PATCH", "DELETE"];
+const protectWrites = (req, res, next) =>
+  WRITE_METHODS.includes(req.method) ? requireAuth(req, res, next) : next();
+
+app.use("/api/categories", protectWrites, categoryRoutes);
+app.use("/api/products", protectWrites, productRoutes);
 
 /* ---------- مسیرهای ناشناخته در /api ---------- */
 app.use("/api", (req, res) => {

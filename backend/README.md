@@ -58,6 +58,67 @@ curl -X DELETE http://localhost:5000/api/categories/<شناسهٔ دسته>
 
 دسته و همهٔ محصولات داخلش حذف می‌شوند.
 
+## افزودن محصول (POST /api/products)
+
+```bash
+curl -X POST http://localhost:5000/api/products \
+  -H "Content-Type: application/json" \
+  -d '{"name": "لیموناد", "category": "<شناسهٔ دسته>"}'
+```
+
+- `name` (الزامی) — نام محصول
+- `category` (الزامی) — شناسهٔ دسته (از GET /api/categories بگیر)
+- `description`، `image`، `available` — اختیاری
+
+## ویرایش محصول (PATCH /api/products/:id)
+
+```bash
+curl -X PATCH http://localhost:5000/api/products/<شناسهٔ محصول> \
+  -H "Content-Type: application/json" \
+  -d '{"name": "موهیتو توت‌فرنگی", "available": false}'
+```
+
+فقط فیلدهایی که می‌فرستی عوض می‌شوند (نام، دسته، توضیحات، تصویر، موجودی، hidden).
+
+## مخفی‌کردن موقت محصول
+
+مثل دسته‌ها، هر محصول فیلد `hidden` دارد (پیش‌فرض `false`):
+
+```bash
+curl -X PATCH http://localhost:5000/api/products/<شناسهٔ محصول> \
+  -H "Content-Type: application/json" \
+  -d '{"hidden": true}'
+```
+
+و برای برگرداندن: `{"hidden": false}`. محصول مخفی در `GET /api/products` با `hidden: true` می‌آید اما در سایت نمایش داده نمی‌شود.
+
+## حذف محصول (DELETE /api/products/:id)
+
+```bash
+curl -X DELETE http://localhost:5000/api/products/<شناسهٔ محصول>
+```
+
+## ورود به پنل (فقط رمز)
+
+عملیات تغییر (افزودن/ویرایش/حذف) نیاز به توکن دارند:
+
+```bash
+# ۱) توکن بگیر
+curl -X POST http://localhost:5000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"password": "luce2026"}'
+
+# ۲) توکن را در هدر بفرست
+curl -X POST http://localhost:5000/api/categories \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <توکن>" \
+  -d '{"name": "دسر و کیک"}'
+```
+
+- رمز در `backend/.env` با کلید `PANEL_PASSWORD` تنظیم می‌شود (پیش‌فرض: `luce2026` — حتماً عوضش کن)
+- `GET` ها بدون توکن در دسترس‌اند (سایت از آن‌ها استفاده می‌کند)
+- پنل مدیریت (`panel.html`) قبل از ورود، فرم رمز نشان می‌دهد و توکن را در sessionStorage نگه می‌دارد
+
 ## مخفی‌کردن موقت دسته
 
 هر دسته یک فیلد `hidden` دارد (پیش‌فرض `false`). برای مخفی‌کردن:

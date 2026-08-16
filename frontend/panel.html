@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>پنل مدیریت | کافه لوچه</title>
+    <link rel="icon" type="image/jpeg" href="imges/luce-logo.jpg" />
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/panel.css" />
+  </head>
+  <body class="panel-body is-locked">
+    <!-- ورود به پنل — بدون رمز، پنل باز نمی‌شود -->
+    <section class="panel-login" id="panel-login">
+      <div class="card panel-login__card">
+        <h2 class="panel-login__title">ورود به پنل مدیریت</h2>
+        <p class="panel-login__hint">برای مدیریت منو، رمز پنل را وارد کنید.</p>
+        <form id="login-form" class="panel-login__form" novalidate>
+          <input
+            id="login-password"
+            class="input"
+            type="password"
+            placeholder="رمز پنل"
+            required
+            autocomplete="current-password"
+          />
+          <button class="btn btn--primary" type="submit">ورود</button>
+        </form>
+      </div>
+    </section>
+
+    <header class="panel-header">
+      <div class="panel-header__inner container">
+        <h1 class="panel-header__title">پنل مدیریت لوچه</h1>
+        <a class="btn btn--ghost" href="index.html">مشاهدهٔ سایت</a>
+      </div>
+    </header>
+
+    <nav class="tabs container" aria-label="بخش‌های پنل">
+      <button type="button" class="tab is-active" data-tab="categories" aria-selected="true">
+        دسته‌بندی‌ها
+      </button>
+      <button type="button" class="tab" data-tab="items" aria-selected="false">
+        آیتم‌های منو
+      </button>
+    </nav>
+
+    <main class="container panel-main">
+      <!-- دسته‌بندی‌ها -->
+      <section class="panel-section" id="tab-categories">
+        <div class="card">
+          <button id="open-category-modal" class="btn btn--primary btn--block" type="button">
+            افزودن دستهٔ جدید
+          </button>
+        </div>
+
+        <h2 class="section-title">دسته‌بندی‌های فعلی</h2>
+        <ul class="list" id="category-list"></ul>
+      </section>
+
+      <!-- آیتم‌های منو -->
+      <section class="panel-section" id="tab-items" hidden>
+        <div class="card">
+          <label class="field-label" for="item-category">انتخاب دسته</label>
+          <select id="item-category" class="input input--select"></select>
+        </div>
+
+        <div class="card">
+          <h2 class="card__title">افزودن آیتم به دستهٔ انتخاب‌شده</h2>
+          <form id="item-form" class="form-row" novalidate>
+            <input
+              id="item-name"
+              class="input"
+              type="text"
+              placeholder="نام نوشیدنی یا خوراکی"
+              maxlength="60"
+              required
+              autocomplete="off"
+            />
+            <button class="btn btn--primary" type="submit">افزودن</button>
+          </form>
+        </div>
+
+        <h2 class="section-title">آیتم‌های «<span id="item-category-title"></span>»</h2>
+        <ul class="list" id="item-list"></ul>
+      </section>
+    </main>
+
+    <footer class="panel-footer container">
+      <button id="export-json" class="btn btn--ghost" type="button">خروجی JSON</button>
+      <button id="reset-data" class="btn btn--danger" type="button">بازنشانی به داده‌های پیش‌فرض</button>
+    </footer>
+
+    <!-- مودال افزودن دسته -->
+    <div class="modal" id="category-modal" hidden>
+      <div class="modal__backdrop" data-close-modal></div>
+      <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
+        <h2 class="modal__title" id="category-modal-title">افزودن دستهٔ جدید</h2>
+        <form id="category-form" class="modal__form" novalidate>
+          <label class="field-label" for="category-name">نام دسته</label>
+          <input
+            id="category-name"
+            class="input"
+            type="text"
+            placeholder="مثلاً: دسر و کیک"
+            maxlength="40"
+            required
+            autocomplete="off"
+          />
+          <label class="field-label" for="category-svg">کد SVG آیکون</label>
+          <textarea
+            id="category-svg"
+            class="input"
+            rows="5"
+            placeholder="&lt;svg viewBox=&quot;0 0 24 24&quot;&gt;...&lt;/svg&gt;"
+            dir="ltr"
+            spellcheck="false"
+          ></textarea>
+          <div class="modal__actions">
+            <button class="btn btn--primary" type="submit">افزودن</button>
+            <button class="btn btn--ghost" type="button" data-close-modal>انصراف</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="js/panel.js" defer></script>
+  </body>
+</html>

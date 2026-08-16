@@ -132,7 +132,7 @@
     });
     products.forEach((p) => {
       if (p.category && menu[p.category.id]) {
-        menu[p.category.id].push({ id: p.id, name: p.name });
+        menu[p.category.id].push({ id: p.id, name: p.name, hidden: p.hidden });
       }
     });
 
@@ -209,7 +209,8 @@
   function buildMenu(categoryId) {
     menuList.replaceChildren();
 
-    const items = state.menu[categoryId] ?? [];
+    // محصولات مخفی موقت در سایت نمایش داده نمی‌شوند
+    const items = (state.menu[categoryId] ?? []).filter((item) => !item.hidden);
 
     if (items.length === 0) {
       const empty = document.createElement("li");
@@ -343,5 +344,9 @@
     buildCategoryButtons();
     buildMenu(activeId);
     measure();
+
+    // لودینگ را برمی‌داریم — منو آماده است
+    const loading = $("#menu-loading");
+    if (loading) loading.remove();
   })();
 })();

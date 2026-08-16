@@ -13,6 +13,8 @@ const productSchema = new mongoose.Schema(
     },
     image: { type: String, default: "" },
     available: { type: Boolean, default: true },
+    // مخفی‌سازی موقت توسط مدیر: true = در سایت نمایش داده نشود
+    hidden: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

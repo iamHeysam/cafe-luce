@@ -2,18 +2,19 @@
    احراز هویت پنل — ورود با نام کاربری + رمز
    - POST /api/login → اگر کاربر و رمز درست بود یک توکن برمی‌گرداند
    - requireAuth → میان‌افزار: فقط با توکن معتبر اجازهٔ ادامه می‌دهد
-   کاربران در MongoDB ذخیره می‌شوند (مدل User، رمز هش‌شده).
-   توکن‌ها در حافظه‌اند؛ با ری‌استارت سرور پاک می‌شوند (دوباره لاگین لازم است).
+   کاربران و توکن‌ها در MongoDB ذخیره می‌شوند؛ توکن یک ماه اعتبار دارد
+   (مدل User با رمز هش‌شده و مدل Token با TTL).
    ========================================================= */
 
 const express = require("express");
 const crypto = require("crypto");
 const User = require("../models/User");
+const Token = require("../models/Token");
 
 const router = express.Router();
 
-// توکن‌های معتبر (در حافظه)
-const tokens = new Set();
+// مدت اعتبار توکن — یک ماه
+const TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 /*
   POST /api/login
@@ -21,30 +22,47 @@ const tokens = new Set();
   → موفق: 200 با { token } | ناموفق: 401
 */
 router.post("/login", async (req, res) => {
-  const { username, password } = req.body || {};
+  try {
+    const { username, password } = req.body || {};
 
-  if (typeof username !== "string" || typeof password !== "string") {
-    return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
+    if (typeof username !== "string" || typeof password !== "string") {
+      return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
+    }
+
+    const user = await User.findOne({ username: username.trim() });
+    if (!user || !user.verifyPassword(password)) {
+      return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    await Token.create({
+      token,
+      username: user.username,
+      expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
+    });
+    res.json({ token, username: user.username });
+  } catch {
+    res.status(500).json({ error: "خطای سرور" });
   }
-
-  const user = await User.findOne({ username: username.trim() }).catch(() => null);
-  if (!user || !user.verifyPassword(password)) {
-    return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
-  }
-
-  const token = crypto.randomBytes(32).toString("hex");
-  tokens.add(token);
-  res.json({ token, username: user.username });
 });
 
 /* میان‌افزار حفاظت — هدر Authorization: Bearer <token> */
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
-  if (token && tokens.has(token)) {
-    return next();
+  if (!token) {
+    return res.status(401).json({ error: "برای این عملیات باید وارد شوید" });
   }
-  res.status(401).json({ error: "برای این عملیات باید وارد شوید" });
+  try {
+    const found = await Token.findOne({ token });
+    if (!found || found.expiresAt <= new Date()) {
+      if (found) await Token.deleteOne({ token });
+      return res.status(401).json({ error: "برای این عملیات باید وارد شوید" });
+    }
+    next();
+  } catch {
+    res.status(500).json({ error: "خطای سرور" });
+  }
 }
 
 module.exports = { router, requireAuth };

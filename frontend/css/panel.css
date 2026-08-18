@@ -205,6 +205,60 @@ button {
   cursor: pointer;
 }
 
+/* اینپوت انگلیسی — همیشه چپ‌چین */
+.input--ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+/* فیلد رمز با دکمهٔ نمایش/مخفی‌کردن */
+.password-field {
+  position: relative;
+}
+
+.password-field .input {
+  padding-right: 4.8rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 3.6rem;
+  height: 3.6rem;
+  padding: 0.7rem;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--brown);
+  cursor: pointer;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.password-toggle:hover {
+  background: rgba(99, 65, 38, 0.12);
+}
+
+.password-toggle svg {
+  width: 100%;
+  height: 100%;
+}
+
+.password-toggle .icon-eye-off {
+  display: none;
+}
+
+.password-toggle.is-visible .icon-eye {
+  display: none;
+}
+
+.password-toggle.is-visible .icon-eye-off {
+  display: block;
+}
+
 /* ---------- انتخاب آیکون ---------- */
 .icon-picker {
   display: flex;
@@ -293,6 +347,19 @@ button {
 
 .btn--danger:hover {
   background: var(--red);
+  color: var(--white);
+}
+
+/* دکمهٔ کاملاً قرمز (پس‌زمینه قرمز با متن سفید) */
+.btn--danger-solid {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+}
+
+.btn--danger-solid:hover {
+  background: #a91f29;
+  border-color: #a91f29;
   color: var(--white);
 }
 
@@ -498,11 +565,24 @@ button {
   border: 1px solid rgba(99, 65, 38, 0.15);
 }
 
+.panel-login__logo-link {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 1.6rem;
+  border-radius: var(--radius);
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.panel-login__logo-link:hover {
+  opacity: 0.85;
+  transform: scale(1.03);
+}
+
 .panel-login__logo {
+  display: block;
   width: 11rem;
   height: 11rem;
   object-fit: cover;
-  margin: 0 auto 1.6rem;
 }
 
 .panel-login__title {

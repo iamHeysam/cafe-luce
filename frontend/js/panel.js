@@ -15,6 +15,8 @@
 
   const API_BASE = "http://localhost:5000";
   const TOKEN_KEY = "luce-panel-token";
+  const TOKEN_EXPIRY_KEY = "luce-panel-token-expiry";
+  const TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // یک ماه
 
   /* ---------- ابزار ---------- */
   const $ = (selector, root = document) => root.querySelector(selector);
@@ -118,7 +120,21 @@
     }
   }
 
-  const getToken = () => sessionStorage.getItem(TOKEN_KEY) || "";
+  /* توکن در localStorage می‌ماند تا یک ماه؛ بعد از انقضا پاک و دوباره ورود لازم است */
+  const getToken = () => {
+    const expiry = Number(localStorage.getItem(TOKEN_EXPIRY_KEY) || 0);
+    if (!expiry || expiry <= Date.now()) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(TOKEN_EXPIRY_KEY);
+      return "";
+    }
+    return localStorage.getItem(TOKEN_KEY) || "";
+  };
+
+  const saveToken = (token) => {
+    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + TOKEN_TTL_MS));
+  };
 
   /* هر درخواست به API — توکن را خودکار در هدر می‌گذارد و خطا را فارسی می‌کند */
   async function api(path, options = {}) {
@@ -212,7 +228,8 @@
   let loginBound = false;
 
   function lockPanel() {
-    sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TOKEN_EXPIRY_KEY);
     document.body.classList.add("is-locked");
     bindLoginForm();
   }
@@ -222,6 +239,20 @@
     loginBound = true;
 
     const form = $("#login-form");
+
+    /* نمایش/مخفی‌کردن رمز */
+    const passwordField = form.querySelector(".password-field");
+    const passwordToggle = form.querySelector(".password-toggle");
+    const passwordInput = form.querySelector("#login-password");
+    passwordToggle.addEventListener("click", () => {
+      const show = passwordInput.type === "password";
+      passwordInput.type = show ? "text" : "password";
+      passwordToggle.classList.toggle("is-visible", show);
+      passwordToggle.setAttribute("aria-pressed", String(show));
+      passwordToggle.setAttribute("aria-label", show ? "مخفی کردن رمز" : "نمایش رمز");
+      passwordInput.focus();
+    });
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const username = $("#login-username").value.trim();
@@ -235,7 +266,7 @@
           method: "POST",
           body: JSON.stringify({ username, password }),
         });
-        sessionStorage.setItem(TOKEN_KEY, res.token);
+        saveToken(res.token);
         document.body.classList.remove("is-locked");
         $("#login-username").value = "";
         $("#login-password").value = "";
@@ -542,14 +573,22 @@
         toast("نام دسته را وارد کنید.", "error");
         return;
       }
+      const svg = els.categorySvg.value.trim();
+      if (!svg) {
+        toast("کد SVG آیکون را وارد کنید.", "error");
+        return;
+      }
+      if (!/^<svg[\s>][\s\S]*<\/svg>$/i.test(svg)) {
+        toast("فقط کد SVG معتبر وارد کنید.", "error");
+        return;
+      }
       if (data.categories.some((c) => c.label === name)) {
         toast("دسته‌ای با این نام وجود دارد.", "error");
         return;
       }
-      const svg = els.categorySvg.value.trim();
       closeCategoryModal();
       try {
-        const created = await createCategory(name, svg || "coldGlass");
+        const created = await createCategory(name, svg);
         await refresh();
         activeCategoryId = created.id;
         renderAll();
@@ -712,7 +751,7 @@
   (async function init() {
     bindEvents();
 
-    if (sessionStorage.getItem(TOKEN_KEY)) {
+    if (getToken()) {
       document.body.classList.remove("is-locked");
     } else {
       bindLoginForm();

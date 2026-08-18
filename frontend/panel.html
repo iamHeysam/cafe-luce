@@ -20,33 +20,77 @@
         aria-hidden="true"
       />
       <div class="card panel-login__card">
-        <img
-          class="panel-login__logo"
-          src="imges/luce-logo.jpg"
-          alt="لوگوی کافه لوچه"
-          width="168"
-          height="168"
-        />
+        <a
+          class="panel-login__logo-link"
+          href="index.html"
+          aria-label="مشاهدهٔ سایت کافه لوچه"
+        >
+          <img
+            class="panel-login__logo"
+            src="imges/luce-logo.jpg"
+            alt="لوگوی کافه لوچه"
+            width="168"
+            height="168"
+          />
+        </a>
         <h2 class="panel-login__title">ورود به پنل مدیریت</h2>
         <form id="login-form" class="panel-login__form" novalidate>
           <input
             id="login-username"
-            class="input"
+            class="input input--ltr"
             type="text"
             placeholder="Username"
             required
             autocomplete="username"
             dir="ltr"
           />
-          <input
-            id="login-password"
-            class="input"
-            type="password"
-            placeholder="Password"
-            required
-            autocomplete="current-password"
-            dir="ltr"
-          />
+          <div class="password-field">
+            <input
+              id="login-password"
+              class="input"
+              type="password"
+              placeholder="Password"
+              required
+              autocomplete="current-password"
+              dir="ltr"
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              aria-label="نمایش رمز"
+              aria-pressed="false"
+              title="نمایش/مخفی‌کردن رمز"
+            >
+              <svg
+                class="icon-eye"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <svg
+                class="icon-eye-off"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+            </button>
+          </div>
           <button class="btn btn--primary" type="submit">ورود</button>
         </form>
       </div>
@@ -120,28 +164,28 @@
       <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
         <h2 class="modal__title" id="category-modal-title">افزودن دستهٔ جدید</h2>
         <form id="category-form" class="modal__form" novalidate>
-          <label class="field-label" for="category-name">نام دسته</label>
           <input
             id="category-name"
             class="input"
             type="text"
-            placeholder="مثلاً: دسر و کیک"
+            placeholder="نام دسته"
+            aria-label="نام دسته"
             maxlength="40"
             required
             autocomplete="off"
           />
-          <label class="field-label" for="category-svg">کد SVG آیکون</label>
           <textarea
             id="category-svg"
             class="input"
             rows="5"
-            placeholder="&lt;svg viewBox=&quot;0 0 24 24&quot;&gt;...&lt;/svg&gt;"
+            placeholder="کد SVG آیکون"
+            aria-label="کد SVG آیکون"
             dir="ltr"
             spellcheck="false"
           ></textarea>
           <div class="modal__actions">
             <button class="btn btn--primary" type="submit">افزودن</button>
-            <button class="btn btn--ghost" type="button" data-close-modal>انصراف</button>
+            <button class="btn btn--danger-solid" type="button" data-close-modal>انصراف</button>
           </div>
         </form>
       </div>

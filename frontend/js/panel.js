@@ -241,6 +241,12 @@
     confirmModal: $("#confirm-modal"),
     confirmText: $("#confirm-modal-text"),
     confirmOk: $("#confirm-ok"),
+    managerModal: $("#manager-modal"),
+    managerForm: $("#manager-form"),
+    managerUsername: $("#manager-username"),
+    managerPassword: $("#manager-password"),
+    managerPasswordConfirm: $("#manager-password-confirm"),
+    openManagerModal: $("#add-manager-btn"),
     categoryList: $("#category-list"),
     itemCategory: $("#item-category"),
     itemCategoryTitle: $("#item-category-title"),
@@ -446,6 +452,19 @@
     });
   }
 
+  /* ---------- مودال افزودن مدیر ---------- */
+  function openManagerModal() {
+    els.managerModal.hidden = false;
+    els.managerUsername.focus();
+  }
+
+  function closeManagerModal() {
+    els.managerModal.hidden = true;
+    els.managerUsername.value = "";
+    els.managerPassword.value = "";
+    els.managerPasswordConfirm.value = "";
+  }
+
   /* ---------- مودال تأیید حذف ---------- */
   let confirmAction = null;
 
@@ -517,6 +536,46 @@
       if (event.target.closest("[data-close-modal]")) closeCategoryModal();
     });
 
+    /* مودال افزودن مدیر */
+    els.openManagerModal.addEventListener("click", openManagerModal);
+    els.managerModal.addEventListener("click", (event) => {
+      if (event.target.closest("[data-close-manager]")) closeManagerModal();
+    });
+    els.managerForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const username = els.managerUsername.value.trim();
+      const password = els.managerPassword.value;
+      const passwordConfirm = els.managerPasswordConfirm.value;
+
+      if (!username) {
+        toast("نام کاربری را وارد کنید.", "error");
+        return;
+      }
+      if (!password) {
+        toast("رمز را وارد کنید.", "error");
+        return;
+      }
+      if (password.length < 6) {
+        toast("رمز باید حداقل ۶ کاراکتر باشد.", "error");
+        return;
+      }
+      if (password !== passwordConfirm) {
+        toast("رمز و تکرار آن یکی نیستند.", "error");
+        return;
+      }
+
+      closeManagerModal();
+      try {
+        const res = await api("/api/users", {
+          method: "POST",
+          body: JSON.stringify({ username, password }),
+        });
+        toast(`مدیر «${res.username}» اضافه شد.`);
+      } catch (err) {
+        toast(err.message || "خطا در افزودن مدیر", "error", 4000);
+      }
+    });
+
     /* مودال تأیید حذف */
     els.confirmModal.addEventListener("click", (event) => {
       if (event.target.closest("[data-close-confirm]")) closeConfirmModal();
@@ -533,6 +592,9 @@
       }
       if (event.key === "Escape" && !els.confirmModal.hidden) {
         closeConfirmModal();
+      }
+      if (event.key === "Escape" && !els.managerModal.hidden) {
+        closeManagerModal();
       }
     });
 

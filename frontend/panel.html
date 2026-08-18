@@ -192,6 +192,50 @@
       </div>
     </div>
 
+    <!-- مودال افزودن مدیر -->
+    <div class="modal" id="manager-modal" hidden>
+      <div class="modal__backdrop" data-close-manager></div>
+      <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="manager-modal-title">
+        <h2 class="modal__title" id="manager-modal-title">افزودن مدیر</h2>
+        <form id="manager-form" class="modal__form" novalidate>
+          <input
+            id="manager-username"
+            class="input input--ltr"
+            type="text"
+            placeholder="Username"
+            aria-label="Username"
+            required
+            autocomplete="off"
+            dir="ltr"
+          />
+          <input
+            id="manager-password"
+            class="input"
+            type="password"
+            placeholder="Password"
+            aria-label="Password"
+            required
+            autocomplete="new-password"
+            dir="ltr"
+          />
+          <input
+            id="manager-password-confirm"
+            class="input"
+            type="password"
+            placeholder="Confirm Password"
+            aria-label="Confirm Password"
+            required
+            autocomplete="new-password"
+            dir="ltr"
+          />
+          <div class="modal__actions">
+            <button class="btn btn--primary" type="submit">افزودن</button>
+            <button class="btn btn--danger-solid" type="button" data-close-manager>انصراف</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- مودال تأیید حذف -->
     <div class="modal" id="confirm-modal" hidden>
       <div class="modal__backdrop" data-close-confirm></div>

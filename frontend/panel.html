@@ -126,28 +126,17 @@
 
       <!-- آیتم‌های منو -->
       <section class="panel-section" id="tab-items" hidden>
-        <div class="card">
-          <label class="field-label" for="item-category">انتخاب دسته</label>
-          <select id="item-category" class="input input--select"></select>
+        <div class="card card--category-picker">
+          <h2 class="card__title">انتخاب دسته</h2>
+          <div class="category-picker" id="item-category-picker" role="tablist" aria-label="دسته‌ها"></div>
         </div>
 
         <div class="card">
-          <h2 class="card__title">افزودن آیتم به دستهٔ انتخاب‌شده</h2>
-          <form id="item-form" class="form-row" novalidate>
-            <input
-              id="item-name"
-              class="input"
-              type="text"
-              placeholder="نام نوشیدنی یا خوراکی"
-              maxlength="60"
-              required
-              autocomplete="off"
-            />
-            <button class="btn btn--primary" type="submit">افزودن</button>
-          </form>
+          <button id="open-item-modal" class="btn btn--primary btn--block" type="button">
+            افزودن آیتم جدید
+          </button>
         </div>
 
-        <h2 class="section-title">آیتم‌های «<span id="item-category-title"></span>»</h2>
         <ul class="list" id="item-list"></ul>
       </section>
     </main>
@@ -231,6 +220,74 @@
           <div class="modal__actions">
             <button class="btn btn--primary" type="submit">افزودن</button>
             <button class="btn btn--danger-solid" type="button" data-close-manager>انصراف</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- مودال افزودن آیتم -->
+    <div class="modal" id="item-modal" hidden>
+      <div class="modal__backdrop" data-close-item></div>
+      <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="item-modal-title">
+        <h2 class="modal__title" id="item-modal-title">افزودن آیتم جدید</h2>
+        <form id="item-form" class="modal__form" novalidate>
+          <input
+            id="item-name"
+            class="input"
+            type="text"
+            placeholder="نام آیتم"
+            aria-label="نام آیتم"
+            maxlength="60"
+            required
+            autocomplete="off"
+          />
+          <div class="modal__actions">
+            <button id="item-submit-btn" class="btn btn--primary" type="submit">افزودن</button>
+            <button class="btn btn--danger-solid" type="button" data-close-item>انصراف</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- مودال تغییر رمز -->
+    <div class="modal" id="change-password-modal" hidden>
+      <div class="modal__backdrop" data-close-change-password></div>
+      <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="change-password-modal-title">
+        <h2 class="modal__title" id="change-password-modal-title">تغییر دادن رمز</h2>
+        <form id="change-password-form" class="modal__form" novalidate>
+          <input
+            id="cp-current"
+            class="input"
+            type="password"
+            placeholder="Current Password"
+            aria-label="Current Password"
+            required
+            autocomplete="current-password"
+            dir="ltr"
+          />
+          <input
+            id="cp-new"
+            class="input"
+            type="password"
+            placeholder="New Password"
+            aria-label="New Password"
+            required
+            autocomplete="new-password"
+            dir="ltr"
+          />
+          <input
+            id="cp-confirm"
+            class="input"
+            type="password"
+            placeholder="Confirm Password"
+            aria-label="Confirm Password"
+            required
+            autocomplete="new-password"
+            dir="ltr"
+          />
+          <div class="modal__actions">
+            <button class="btn btn--primary" type="submit">تغییر رمز</button>
+            <button class="btn btn--danger-solid" type="button" data-close-change-password>انصراف</button>
           </div>
         </form>
       </div>

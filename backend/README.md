@@ -139,7 +139,13 @@ curl -X POST http://localhost:5000/api/users \
 curl http://localhost:5000/api/users \
   -H "Authorization: Bearer <توکن>"
 
-# تغییر رمز (نشست‌های آن کاربر هم باطل می‌شود)
+# تغییر رمز خود (نیازمند رمز قبلی — نشست‌ها باطل می‌شود)
+curl -X PATCH http://localhost:5000/api/users/me/password \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <توکن>" \
+  -d '{"currentPassword": "oldpass", "password": "newpass123"}'
+
+# تغییر رمز کاربر دیگر توسط مدیر (بدون رمز قبلی)
 curl -X PATCH http://localhost:5000/api/users/new-admin/password \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <توکن>" \

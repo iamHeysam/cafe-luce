@@ -33,7 +33,8 @@ app.get("/", (req, res) => {
       "POST /api/login": "ورود به پنل با رمز — توکن برمی‌گرداند",
       "POST /api/users": "افزودن مدیر جدید (نیازمند توکن)",
       "GET /api/users": "لیست مدیرها (نیازمند توکن)",
-      "PATCH /api/users/:username/password": "تغییر رمز (نیازمند توکن)",
+      "PATCH /api/users/me/password": "تغییر رمز خود (با رمز قبلی، نیازمند توکن)",
+      "PATCH /api/users/:username/password": "تغییر رمز توسط مدیر (نیازمند توکن)",
     },
     "عملیات تغییر (POST/PATCH/DELETE)": "نیازمند هدر Authorization: Bearer <token> هستند",
   });

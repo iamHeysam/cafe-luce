@@ -53,7 +53,38 @@ router.get("/", async (req, res) => {
   }
 });
 
-/* تغییر رمز — همهٔ نشست‌های آن کاربر هم باطل می‌شود */
+/* تغییر رمز خودِ کاربرِ واردشده — نیازمند رمز قبلی */
+router.patch("/me/password", async (req, res) => {
+  try {
+    const { currentPassword, password } = req.body || {};
+
+    if (typeof currentPassword !== "string" || !currentPassword) {
+      return res.status(400).json({ error: "رمز قبلی را وارد کنید" });
+    }
+    if (typeof password !== "string" || password.length < MIN_PASSWORD_LENGTH) {
+      return res
+        .status(400)
+        .json({ error: `رمز باید حداقل ${MIN_PASSWORD_LENGTH} کاراکتر باشد` });
+    }
+
+    const user = await User.findOne({ username: req.username });
+    if (!user || !user.verifyPassword(currentPassword)) {
+      return res.status(403).json({ error: "رمز قبلی اشتباه است" });
+    }
+
+    user.passwordHash = User.hashPassword(password);
+    await user.save();
+
+    // با تغییر رمز، همهٔ نشست‌های آن کاربر باطل می‌شود (دوباره ورود لازم است)
+    await Token.deleteMany({ username: user.username });
+
+    res.json({ username: user.username, message: "رمز تغییر کرد" });
+  } catch {
+    res.status(500).json({ error: "خطای سرور" });
+  }
+});
+
+/* تغییر رمز توسط مدیر — همهٔ نشست‌های آن کاربر هم باطل می‌شود */
 router.patch("/:username/password", async (req, res) => {
   try {
     const username = String(req.params.username || "").trim();

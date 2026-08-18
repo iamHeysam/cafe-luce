@@ -204,6 +204,40 @@ button {
   cursor: pointer;
 }
 
+/* ---------- انتخاب دسته با کلیک (تب آیتم‌ها) ---------- */
+.card--category-picker .card__title {
+  text-align: center;
+}
+
+.category-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.category-picker__btn {
+  width: calc(50% - 0.4rem);
+  padding: 0.8rem 1.4rem;
+  font-family: inherit;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--brown);
+  background: var(--white);
+  border: 2px solid var(--brown);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.category-picker__btn:hover {
+  box-shadow: var(--shadow-soft);
+}
+
+.category-picker__btn.is-active {
+  background: var(--brown);
+  color: var(--cream);
+}
+
 /* اینپوت انگلیسی — همیشه چپ‌چین */
 .input--ltr {
   direction: ltr;
@@ -576,6 +610,11 @@ button {
 
 .toast[data-type="error"] {
   background: var(--red);
+  color: var(--white);
+}
+
+.toast[data-type="ok"] {
+  background: var(--green);
   color: var(--white);
 }
 

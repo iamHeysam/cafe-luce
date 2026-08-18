@@ -13,17 +13,39 @@
   <body class="panel-body is-locked">
     <!-- ورود به پنل — بدون رمز، پنل باز نمی‌شود -->
     <section class="panel-login" id="panel-login">
+      <img
+        class="panel-login__bg"
+        src="imges/luce-bg.jpeg"
+        alt=""
+        aria-hidden="true"
+      />
       <div class="card panel-login__card">
+        <img
+          class="panel-login__logo"
+          src="imges/luce-logo.jpg"
+          alt="لوگوی کافه لوچه"
+          width="168"
+          height="168"
+        />
         <h2 class="panel-login__title">ورود به پنل مدیریت</h2>
-        <p class="panel-login__hint">برای مدیریت منو، رمز پنل را وارد کنید.</p>
         <form id="login-form" class="panel-login__form" novalidate>
+          <input
+            id="login-username"
+            class="input"
+            type="text"
+            placeholder="Username"
+            required
+            autocomplete="username"
+            dir="ltr"
+          />
           <input
             id="login-password"
             class="input"
             type="password"
-            placeholder="رمز پنل"
+            placeholder="Password"
             required
             autocomplete="current-password"
+            dir="ltr"
           />
           <button class="btn btn--primary" type="submit">ورود</button>
         </form>

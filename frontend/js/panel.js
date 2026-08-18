@@ -224,18 +224,24 @@
     const form = $("#login-form");
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      const username = $("#login-username").value.trim();
       const password = $("#login-password").value;
+      if (!username || !password) {
+        toast("نام کاربری و رمز را وارد کنید.", "error");
+        return;
+      }
       try {
         const res = await api("/api/login", {
           method: "POST",
-          body: JSON.stringify({ password }),
+          body: JSON.stringify({ username, password }),
         });
         sessionStorage.setItem(TOKEN_KEY, res.token);
         document.body.classList.remove("is-locked");
+        $("#login-username").value = "";
         $("#login-password").value = "";
         toast("خوش آمدید");
       } catch (err) {
-        toast(err.message || "رمز اشتباه است", "error", 3000);
+        toast(err.message || "نام کاربری یا رمز اشتباه است", "error", 3000);
       }
     });
   }

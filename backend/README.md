@@ -98,15 +98,19 @@ curl -X PATCH http://localhost:5000/api/products/<شناسهٔ محصول> \
 curl -X DELETE http://localhost:5000/api/products/<شناسهٔ محصول>
 ```
 
-## ورود به پنل (فقط رمز)
+## ورود به پنل (نام کاربری + رمز)
 
+کاربران در MongoDB ذخیره می‌شوند (مدل `User`، رمز هش‌شده با scrypt).
 عملیات تغییر (افزودن/ویرایش/حذف) نیاز به توکن دارند:
 
 ```bash
+# ۰) کاربر بساز (اگر هنوز ساخته نشده)
+npm run create-user -- "A-Man" "12345678"
+
 # ۱) توکن بگیر
 curl -X POST http://localhost:5000/api/login \
   -H "Content-Type: application/json" \
-  -d '{"password": "luce2026"}'
+  -d '{"username": "A-Man", "password": "12345678"}'
 
 # ۲) توکن را در هدر بفرست
 curl -X POST http://localhost:5000/api/categories \
@@ -115,7 +119,7 @@ curl -X POST http://localhost:5000/api/categories \
   -d '{"name": "دسر و کیک"}'
 ```
 
-- رمز در `backend/.env` با کلید `PANEL_PASSWORD` تنظیم می‌شود (پیش‌فرض: `luce2026` — حتماً عوضش کن)
+- ساخت/به‌روزرسانی کاربر: `npm run create-user -- <username> <password>` (داده‌های منو دست نمی‌خورد)
 - `GET` ها بدون توکن در دسترس‌اند (سایت از آن‌ها استفاده می‌کند)
 - پنل مدیریت (`panel.html`) قبل از ورود، فرم رمز نشان می‌دهد و توکن را در sessionStorage نگه می‌دارد
 

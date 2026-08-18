@@ -1,34 +1,40 @@
 /* =========================================================
-   احراز هویت سادهٔ پنل — فقط رمز (بدون نام کاربری)
-   - POST /api/login → اگر رمز درست بود یک توکن برمی‌گرداند
+   احراز هویت پنل — ورود با نام کاربری + رمز
+   - POST /api/login → اگر کاربر و رمز درست بود یک توکن برمی‌گرداند
    - requireAuth → میان‌افزار: فقط با توکن معتبر اجازهٔ ادامه می‌دهد
+   کاربران در MongoDB ذخیره می‌شوند (مدل User، رمز هش‌شده).
    توکن‌ها در حافظه‌اند؛ با ری‌استارت سرور پاک می‌شوند (دوباره لاگین لازم است).
    ========================================================= */
 
 const express = require("express");
 const crypto = require("crypto");
+const User = require("../models/User");
 
 const router = express.Router();
-
-// رمز از فایل .env خوانده می‌شود (اگر نبود، یک رمز پیش‌فرض)
-const PANEL_PASSWORD = process.env.PANEL_PASSWORD || "luce2026";
 
 // توکن‌های معتبر (در حافظه)
 const tokens = new Set();
 
 /*
   POST /api/login
-  body: { "password": "..." }
+  body: { "username": "A-Man", "password": "..." }
   → موفق: 200 با { token } | ناموفق: 401
 */
-router.post("/login", (req, res) => {
-  const { password } = req.body || {};
-  if (typeof password === "string" && password === PANEL_PASSWORD) {
-    const token = crypto.randomBytes(32).toString("hex");
-    tokens.add(token);
-    return res.json({ token });
+router.post("/login", async (req, res) => {
+  const { username, password } = req.body || {};
+
+  if (typeof username !== "string" || typeof password !== "string") {
+    return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
   }
-  res.status(401).json({ error: "رمز اشتباه است" });
+
+  const user = await User.findOne({ username: username.trim() }).catch(() => null);
+  if (!user || !user.verifyPassword(password)) {
+    return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
+  }
+
+  const token = crypto.randomBytes(32).toString("hex");
+  tokens.add(token);
+  res.json({ token, username: user.username });
 });
 
 /* میان‌افزار حفاظت — هدر Authorization: Bearer <token> */

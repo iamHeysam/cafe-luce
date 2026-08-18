@@ -164,7 +164,7 @@
       await refresh();
       if (successMessage) toast(successMessage);
     } catch (err) {
-      toast(err.message || "خطا در انجام عملیات", "error", 4000);
+      toast(err.message || "خطای سرور", "error", 4000);
     }
   }
 
@@ -202,7 +202,7 @@
       const username = $("#login-username").value.trim();
       const password = $("#login-password").value;
       if (!username || !password) {
-        toast("نام کاربری و رمز را وارد کنید.", "error");
+        toast("نام کاربری یا رمز خالی است", "error");
         return;
       }
       try {
@@ -214,9 +214,9 @@
         document.body.classList.remove("is-locked");
         $("#login-username").value = "";
         $("#login-password").value = "";
-        toast("خوش آمدید");
+        toast("با موفقیت وارد شدید");
       } catch (err) {
-        toast(err.message || "نام کاربری یا رمز اشتباه است", "error", 3000);
+        toast(err.message || "رمز اشتباه است", "error", 3000);
       }
     });
   }
@@ -225,6 +225,7 @@
   let data = null;
   let activeCategoryId = null;
   let editingCategoryId = null; // null = افزودن، غیر null = ویرایش
+  let editingItemId = null; // null = افزودن، غیر null = ویرایش
 
   /* ---------- DOM ---------- */
   const els = {
@@ -247,11 +248,20 @@
     managerPassword: $("#manager-password"),
     managerPasswordConfirm: $("#manager-password-confirm"),
     openManagerModal: $("#add-manager-btn"),
+    changePasswordModal: $("#change-password-modal"),
+    changePasswordForm: $("#change-password-form"),
+    cpCurrent: $("#cp-current"),
+    cpNew: $("#cp-new"),
+    cpConfirm: $("#cp-confirm"),
+    openChangePasswordBtn: $("#change-password-btn"),
     categoryList: $("#category-list"),
-    itemCategory: $("#item-category"),
-    itemCategoryTitle: $("#item-category-title"),
+    itemCategoryPicker: $("#item-category-picker"),
+    itemModal: $("#item-modal"),
+    itemModalTitle: $("#item-modal-title"),
+    itemSubmitBtn: $("#item-submit-btn"),
     itemForm: $("#item-form"),
     itemName: $("#item-name"),
+    openItemModal: $("#open-item-modal"),
     itemList: $("#item-list"),
     toast: $("#toast"),
   };
@@ -327,32 +337,33 @@
     });
   }
 
-  function renderCategorySelect() {
-    els.itemCategory.replaceChildren();
+  function renderCategoryPicker() {
+    els.itemCategoryPicker.replaceChildren();
 
     if (!data.categories.length) {
-      const option = document.createElement("option");
-      option.value = "";
-      option.textContent = "ابتدا یک دسته بسازید";
-      els.itemCategory.append(option);
-      els.itemCategory.disabled = true;
-      els.itemCategoryTitle.textContent = "";
+      const empty = document.createElement("span");
+      empty.className = "empty";
+      empty.textContent = "ابتدا یک دسته بسازید";
+      els.itemCategoryPicker.append(empty);
       return;
     }
-
-    els.itemCategory.disabled = false;
-    data.categories.forEach((category) => {
-      const option = document.createElement("option");
-      option.value = category.id;
-      option.textContent = category.label;
-      els.itemCategory.append(option);
-    });
 
     if (!activeCategoryId || !data.categories.some((c) => c.id === activeCategoryId)) {
       activeCategoryId = data.categories[0].id;
     }
-    els.itemCategory.value = activeCategoryId;
-    els.itemCategoryTitle.textContent = currentCategory()?.label ?? "";
+
+    data.categories.forEach((category) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className =
+        "category-picker__btn" + (category.id === activeCategoryId ? " is-active" : "");
+      button.dataset.id = category.id;
+      button.setAttribute("role", "tab");
+      button.setAttribute("aria-selected", String(category.id === activeCategoryId));
+      button.textContent = category.label;
+      els.itemCategoryPicker.append(button);
+    });
+
   }
 
   function renderItems() {
@@ -402,54 +413,8 @@
 
   function renderAll() {
     renderCategories();
-    renderCategorySelect();
+    renderCategoryPicker();
     renderItems();
-  }
-
-  /* ---------- ویرایش درجا (inline) ---------- */
-  function inlineEdit({ container, current, maxLength, onSave, onCancel }) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "inline-edit";
-
-    const input = document.createElement("input");
-    input.className = "input input--inline";
-    input.value = current;
-    input.maxLength = maxLength;
-    input.autocomplete = "off";
-
-    const ok = document.createElement("button");
-    ok.type = "button";
-    ok.className = "btn btn--small btn--primary";
-    ok.textContent = "ذخیره";
-
-    const cancel = document.createElement("button");
-    cancel.type = "button";
-    cancel.className = "btn btn--small btn--ghost";
-    cancel.textContent = "انصراف";
-
-    wrapper.append(input, ok, cancel);
-    container.replaceWith(wrapper);
-    input.focus();
-    input.select();
-
-    let done = false;
-    const finish = (save) => {
-      if (done) return;
-      done = true;
-      if (save) onSave(input.value.trim());
-      else onCancel();
-    };
-
-    ok.addEventListener("click", () => finish(true));
-    cancel.addEventListener("click", () => finish(false));
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        finish(true);
-      } else if (event.key === "Escape") {
-        finish(false);
-      }
-    });
   }
 
   /* ---------- مودال افزودن مدیر ---------- */
@@ -463,6 +428,48 @@
     els.managerUsername.value = "";
     els.managerPassword.value = "";
     els.managerPasswordConfirm.value = "";
+  }
+
+  /* ---------- مودال افزودن/ویرایش آیتم ---------- */
+  function openItemModal() {
+    if (!currentCategory()) {
+      toast("دسته انتخاب نشده", "error");
+      return;
+    }
+    editingItemId = null;
+    els.itemModalTitle.textContent = "افزودن آیتم جدید";
+    els.itemSubmitBtn.textContent = "افزودن";
+    els.itemName.value = "";
+    els.itemModal.hidden = false;
+    els.itemName.focus();
+  }
+
+  function editItem(item) {
+    editingItemId = item.id;
+    els.itemModalTitle.textContent = "ویرایش آیتم";
+    els.itemSubmitBtn.textContent = "ذخیره";
+    els.itemName.value = item.name;
+    els.itemModal.hidden = false;
+    els.itemName.focus();
+  }
+
+  function closeItemModal() {
+    els.itemModal.hidden = true;
+    els.itemName.value = "";
+    editingItemId = null;
+  }
+
+  /* ---------- مودال تغییر رمز ---------- */
+  function openChangePasswordModal() {
+    els.changePasswordModal.hidden = false;
+    els.cpCurrent.focus();
+  }
+
+  function closeChangePasswordModal() {
+    els.changePasswordModal.hidden = true;
+    els.cpCurrent.value = "";
+    els.cpNew.value = "";
+    els.cpConfirm.value = "";
   }
 
   /* ---------- مودال تأیید حذف ---------- */
@@ -488,7 +495,7 @@
     openConfirmModal(message, () => {
       runOperation(
         () => removeCategory(category.id),
-        `دستهٔ «${category.label}» حذف شد.`
+        "دسته حذف شد"
       );
     });
   }
@@ -548,19 +555,19 @@
       const passwordConfirm = els.managerPasswordConfirm.value;
 
       if (!username) {
-        toast("نام کاربری را وارد کنید.", "error");
+        toast("نام کاربری خالی است", "error");
         return;
       }
       if (!password) {
-        toast("رمز را وارد کنید.", "error");
+        toast("رمز خالی است", "error");
         return;
       }
       if (password.length < 6) {
-        toast("رمز باید حداقل ۶ کاراکتر باشد.", "error");
+        toast("رمز حداقل ۶ کاراکتر", "error");
         return;
       }
       if (password !== passwordConfirm) {
-        toast("رمز و تکرار آن یکی نیستند.", "error");
+        toast("تکرار رمز اشتباه است", "error");
         return;
       }
 
@@ -570,9 +577,50 @@
           method: "POST",
           body: JSON.stringify({ username, password }),
         });
-        toast(`مدیر «${res.username}» اضافه شد.`);
+        toast("مدیر افزوده شد");
       } catch (err) {
-        toast(err.message || "خطا در افزودن مدیر", "error", 4000);
+        toast(err.message || "خطای سرور", "error", 4000);
+      }
+    });
+
+    /* مودال تغییر رمز */
+    els.openChangePasswordBtn.addEventListener("click", openChangePasswordModal);
+    els.changePasswordModal.addEventListener("click", (event) => {
+      if (event.target.closest("[data-close-change-password]")) closeChangePasswordModal();
+    });
+    els.changePasswordForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const currentPassword = els.cpCurrent.value;
+      const password = els.cpNew.value;
+      const passwordConfirm = els.cpConfirm.value;
+
+      if (!currentPassword) {
+        toast("رمز قبلی خالی است", "error");
+        return;
+      }
+      if (!password) {
+        toast("رمز جدید خالی است", "error");
+        return;
+      }
+      if (password.length < 6) {
+        toast("رمز حداقل ۶ کاراکتر", "error");
+        return;
+      }
+      if (password !== passwordConfirm) {
+        toast("تکرار رمز اشتباه است", "error");
+        return;
+      }
+
+      closeChangePasswordModal();
+      try {
+        await api("/api/users/me/password", {
+          method: "PATCH",
+          body: JSON.stringify({ currentPassword, password }),
+        });
+        lockPanel();
+        toast("رمز تغییر کرد؛ دوباره وارد شوید");
+      } catch (err) {
+        toast(err.message || "خطای سرور", "error", 4000);
       }
     });
 
@@ -596,6 +644,12 @@
       if (event.key === "Escape" && !els.managerModal.hidden) {
         closeManagerModal();
       }
+      if (event.key === "Escape" && !els.changePasswordModal.hidden) {
+        closeChangePasswordModal();
+      }
+      if (event.key === "Escape" && !els.itemModal.hidden) {
+        closeItemModal();
+      }
     });
 
     /* افزودن / ویرایش دسته */
@@ -603,20 +657,20 @@
       event.preventDefault();
       const name = els.categoryName.value.trim();
       if (!name) {
-        toast("نام دسته را وارد کنید.", "error");
+        toast("نام دسته خالی است", "error");
         return;
       }
       const svg = els.categorySvg.value.trim();
       if (!svg) {
-        toast("کد SVG آیکون را وارد کنید.", "error");
+        toast("SVG را وارد کنید", "error");
         return;
       }
       if (!/^<svg[\s>][\s\S]*<\/svg>$/i.test(svg)) {
-        toast("فقط کد SVG معتبر وارد کنید.", "error");
+        toast("SVG معتبر نیست", "error");
         return;
       }
       if (data.categories.some((c) => c.id !== editingCategoryId && c.label === name)) {
-        toast("دسته‌ای با این نام وجود دارد.", "error");
+        toast("این نام تکراری است", "error");
         return;
       }
 
@@ -627,16 +681,16 @@
           await updateCategory(editingId, { name, icon: svg });
           await refresh();
           renderAll();
-          toast(`دستهٔ «${name}» به‌روزرسانی شد.`);
+          toast("دسته ویرایش شد");
         } else {
           const created = await createCategory(name, svg);
           await refresh();
           activeCategoryId = created.id;
           renderAll();
-          toast(`دستهٔ «${name}» اضافه شد.`);
+          toast("دسته افزوده شد");
         }
       } catch (err) {
-        toast(err.message || "خطا در ذخیرهٔ دسته", "error", 4000);
+        toast(err.message || "خطای سرور", "error", 4000);
       }
     });
 
@@ -659,37 +713,51 @@
       switchTab("items");
     });
 
-    /* تغییر دسته در تب آیتم‌ها */
-    els.itemCategory.addEventListener("change", () => {
-      activeCategoryId = els.itemCategory.value || null;
+    /* انتخاب دسته با کلیک در تب آیتم‌ها */
+    els.itemCategoryPicker.addEventListener("click", (event) => {
+      const button = event.target.closest(".category-picker__btn");
+      if (!button) return;
+      activeCategoryId = button.dataset.id;
+      renderCategoryPicker();
       renderItems();
-      els.itemCategoryTitle.textContent = currentCategory()?.label ?? "";
     });
 
-    /* افزودن آیتم */
+    /* مودال افزودن آیتم */
+    els.openItemModal.addEventListener("click", openItemModal);
+    els.itemModal.addEventListener("click", (event) => {
+      if (event.target.closest("[data-close-item]")) closeItemModal();
+    });
     els.itemForm.addEventListener("submit", (event) => {
       event.preventDefault();
       const category = currentCategory();
       if (!category) {
-        toast("ابتدا یک دسته انتخاب کنید.", "error");
+        toast("دسته انتخاب نشده", "error");
         return;
       }
       const name = els.itemName.value.trim();
       if (!name) {
-        toast("نام آیتم را وارد کنید.", "error");
+        toast("نام آیتم خالی است", "error");
         return;
       }
       const items = data.items[category.id] || [];
-      if (items.some((i) => i.name === name)) {
-        toast("این آیتم قبلاً در این دسته وجود دارد.", "error");
+      if (items.some((i) => i.id !== editingItemId && i.name === name)) {
+        toast("این آیتم تکراری است", "error");
         return;
       }
-      runOperation(
-        () => createProduct(name, category.id),
-        `«${name}» به دستهٔ «${category.label}» اضافه شد.`
-      );
-      els.itemName.value = "";
-      els.itemName.focus();
+
+      const editingId = editingItemId;
+      closeItemModal();
+      if (editingId) {
+        runOperation(
+          () => updateProduct(editingId, { name }),
+          "آیتم ویرایش شد"
+        );
+      } else {
+        runOperation(
+          () => createProduct(name, category.id),
+          "آیتم افزوده شد"
+        );
+      }
     });
 
     /* کلیک روی لیست آیتم‌ها */
@@ -702,33 +770,16 @@
       if (!item) return;
 
       if (event.target.closest(".js-delete")) {
-        if (confirm(`آیتم «${item.name}» حذف شود؟`)) {
+        openConfirmModal(`از حذف آیتم «${item.name}» مطمئن هستید؟`, () => {
           runOperation(
             () => removeProduct(item.id),
-            `«${item.name}» حذف شد.`
+            "آیتم حذف شد"
           );
-        }
+        });
         return;
       }
       if (event.target.closest(".js-edit")) {
-        row.classList.add("is-editing");
-        inlineEdit({
-          container: row.querySelector(".list-item__label"),
-          current: item.name,
-          maxLength: 60,
-          onSave: (value) => {
-            if (!value) {
-              toast("نام نمی‌تواند خالی باشد.", "error");
-              renderItems();
-              return;
-            }
-            runOperation(
-              () => updateProduct(item.id, { name: value }),
-              "نام آیتم به‌روزرسانی شد."
-            );
-          },
-          onCancel: renderItems,
-        });
+        editItem(item);
       }
     });
 
@@ -742,7 +793,10 @@
     });
     els.tabCategories.hidden = name !== "categories";
     els.tabItems.hidden = name !== "items";
-    if (name === "items") renderItems();
+    if (name === "items") {
+      renderCategoryPicker();
+      renderItems();
+    }
   }
 
   /* ---------- شروع ---------- */

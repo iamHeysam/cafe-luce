@@ -121,7 +121,6 @@
           </button>
         </div>
 
-        <h2 class="section-title">دسته‌بندی‌های فعلی</h2>
         <ul class="list" id="category-list"></ul>
       </section>
 
@@ -154,8 +153,10 @@
     </main>
 
     <footer class="panel-footer container">
-      <button id="export-json" class="btn btn--ghost" type="button">خروجی JSON</button>
-      <button id="reset-data" class="btn btn--danger" type="button">بازنشانی به داده‌های پیش‌فرض</button>
+      <div class="panel-footer__box">
+        <button id="add-manager-btn" class="btn btn--primary" type="button">افزودن مدیر</button>
+        <button id="change-password-btn" class="btn btn--ghost" type="button">تغییر دادن رمز</button>
+      </div>
     </footer>
 
     <!-- مودال افزودن دسته -->
@@ -184,10 +185,23 @@
             spellcheck="false"
           ></textarea>
           <div class="modal__actions">
-            <button class="btn btn--primary" type="submit">افزودن</button>
+            <button id="category-submit-btn" class="btn btn--primary" type="submit">افزودن</button>
             <button class="btn btn--danger-solid" type="button" data-close-modal>انصراف</button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- مودال تأیید حذف -->
+    <div class="modal" id="confirm-modal" hidden>
+      <div class="modal__backdrop" data-close-confirm></div>
+      <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+        <h2 class="modal__title" id="confirm-modal-title">تأیید حذف</h2>
+        <p class="modal__text" id="confirm-modal-text"></p>
+        <div class="modal__actions">
+          <button id="confirm-ok" class="btn btn--danger-solid" type="button">حذف</button>
+          <button class="btn btn--ghost" type="button" data-close-confirm>انصراف</button>
+        </div>
       </div>
     </div>
 

@@ -124,6 +124,31 @@ curl -X POST http://localhost:5000/api/categories \
 - توکن‌ها در MongoDB ذخیره می‌شوند و **یک ماه** اعتبار دارند (پس از آن باید دوباره وارد شد)
 - پنل مدیریت (`panel.html`) توکن را در `localStorage` نگه می‌دارد تا مدیر مجبور نباشد هر بار رمز بزند
 
+## مدیریت مدیرها (کاربران پنل)
+
+همهٔ این عملیات نیازمند توکن ورود هستند (`Authorization: Bearer <توکن>`):
+
+```bash
+# ساخت مدیر جدید
+curl -X POST http://localhost:5000/api/users \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <توکن>" \
+  -d '{"username": "new-admin", "password": "12345678"}'
+
+# لیست مدیرها
+curl http://localhost:5000/api/users \
+  -H "Authorization: Bearer <توکن>"
+
+# تغییر رمز (نشست‌های آن کاربر هم باطل می‌شود)
+curl -X PATCH http://localhost:5000/api/users/new-admin/password \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <توکن>" \
+  -d '{"password": "newpass123"}'
+```
+
+- رمز باید حداقل ۶ کاراکتر باشد
+- بعد از تغییر رمز، همهٔ نشست‌های فعال آن کاربر باطل می‌شود و باید دوباره وارد شود
+
 ## مخفی‌کردن موقت دسته
 
 هر دسته یک فیلد `hidden` دارد (پیش‌فرض `false`). برای مخفی‌کردن:

@@ -55,62 +55,6 @@
       </svg>`,
   };
 
-  /* ---------- داده‌های پیش‌فرض (برای دکمهٔ «بازنشانی») ---------- */
-  const DEFAULT_CATEGORIES = [
-    { id: "spressoHotBased", label: "بار گرم بر پایه اسپرسو", icon: "espressoHot" },
-    { id: "spressoColdBased", label: "بار سرد بر پایه اسپرسو", icon: "espressoCold" },
-    { id: "hotDrinks", label: "نوشیدنی گرم و دمنوش", icon: "frenchPress" },
-    { id: "coldDrink", label: "نوشیدنی سرد", icon: "coldGlass" },
-  ];
-
-  const DEFAULT_ITEMS = {
-    spressoHotBased: [
-      "اسپرسو سینگل",
-      "اسپرسو دبل",
-      "ماکیاتو",
-      "اسپرسو رومانو",
-      "اسپرسو کُن‌پانا",
-      "اسپرسو کُن‌کانلا",
-      "اسپرسو بوم بُن",
-      "امریکانو",
-      "لاته",
-      "موکا",
-      "کارامل ماکیاتو",
-      "کاپوچینو",
-      "وانیلا لاته",
-      "هاتزل لاته",
-      "سینامون لاته",
-      "لوتوس لاته",
-      "دالگونا",
-    ],
-    spressoColdBased: [
-      "ایس امریکانو",
-      "ایس لاته",
-      "ایس کارامل ماکیاتو",
-      "ایس موکا",
-      "ایس وانیلا لاته",
-      "ایس هاتزل لاته",
-      "ایس لوتوس لاته",
-      "ایس لاته دورو",
-      "ایس لاته منتا",
-      "افوگاتو",
-    ],
-    hotDrinks: ["چای", "هات چاکلت", "تی لاته زعفران پسته", "چای کرک", "چای ماسالا", "انواع دمنوش"],
-    coldDrink: [
-      "موهيتو كلاسيک",
-      "موهيتو فراگولا",
-      "موهيتو ويولا",
-      "موهيتو كوييک",
-      "موهيتو دورو",
-      "مارين",
-      "جنوا",
-      "ورونا",
-      "فلورنزا",
-      "روما سان ست",
-      "ترنتينو",
-    ],
-  };
-
   /* ---------- لایهٔ API ---------- */
 
   class ApiError extends Error {
@@ -280,6 +224,7 @@
   /* ---------- وضعیت ---------- */
   let data = null;
   let activeCategoryId = null;
+  let editingCategoryId = null; // null = افزودن، غیر null = ویرایش
 
   /* ---------- DOM ---------- */
   const els = {
@@ -290,15 +235,18 @@
     categoryName: $("#category-name"),
     categorySvg: $("#category-svg"),
     categoryModal: $("#category-modal"),
+    categoryModalTitle: $("#category-modal-title"),
+    categorySubmitBtn: $("#category-submit-btn"),
     openCategoryModal: $("#open-category-modal"),
+    confirmModal: $("#confirm-modal"),
+    confirmText: $("#confirm-modal-text"),
+    confirmOk: $("#confirm-ok"),
     categoryList: $("#category-list"),
     itemCategory: $("#item-category"),
     itemCategoryTitle: $("#item-category-title"),
     itemForm: $("#item-form"),
     itemName: $("#item-name"),
     itemList: $("#item-list"),
-    exportBtn: $("#export-json"),
-    resetBtn: $("#reset-data"),
     toast: $("#toast"),
   };
 
@@ -498,22 +446,51 @@
     });
   }
 
+  /* ---------- مودال تأیید حذف ---------- */
+  let confirmAction = null;
+
+  function openConfirmModal(text, onConfirm) {
+    els.confirmText.textContent = text;
+    confirmAction = onConfirm;
+    els.confirmModal.hidden = false;
+  }
+
+  function closeConfirmModal() {
+    els.confirmModal.hidden = true;
+    confirmAction = null;
+  }
+
   /* ---------- عملیات دسته‌ها ---------- */
   function deleteCategory(category) {
     const count = (data.items[category.id] || []).length;
     const message = count
-      ? `دستهٔ «${category.label}» همراه با ${count} آیتمش حذف شود؟`
-      : `دستهٔ «${category.label}» حذف شود؟`;
-    if (!confirm(message)) return;
-
-    runOperation(
-      () => removeCategory(category.id),
-      `دستهٔ «${category.label}» حذف شد.`
-    );
+      ? `از حذف دستهٔ «${category.label}» همراه با ${count} آیتمش مطمئن هستید؟`
+      : `از حذف دستهٔ «${category.label}» مطمئن هستید؟`;
+    openConfirmModal(message, () => {
+      runOperation(
+        () => removeCategory(category.id),
+        `دستهٔ «${category.label}» حذف شد.`
+      );
+    });
   }
 
-  /* ---------- مودال افزودن دسته ---------- */
+  /* ---------- مودال افزودن/ویرایش دسته ---------- */
   function openCategoryModal() {
+    editingCategoryId = null;
+    els.categoryModalTitle.textContent = "افزودن دستهٔ جدید";
+    els.categorySubmitBtn.textContent = "افزودن";
+    els.categoryName.value = "";
+    els.categorySvg.value = "";
+    els.categoryModal.hidden = false;
+    els.categoryName.focus();
+  }
+
+  function editCategory(category) {
+    editingCategoryId = category.id;
+    els.categoryModalTitle.textContent = "ویرایش دسته";
+    els.categorySubmitBtn.textContent = "ذخیره";
+    els.categoryName.value = category.label;
+    els.categorySvg.value = ICONS[category.icon] || category.icon || "";
     els.categoryModal.hidden = false;
     els.categoryName.focus();
   }
@@ -522,30 +499,10 @@
     els.categoryModal.hidden = true;
     els.categoryName.value = "";
     els.categorySvg.value = "";
+    editingCategoryId = null;
   }
 
-  function editCategory(category) {
-    const row = els.categoryList.querySelector(`[data-id="${category.id}"]`);
-    if (!row) return;
-    row.classList.add("is-editing");
-    inlineEdit({
-      container: row.querySelector(".list-item__label"),
-      current: category.label,
-      maxLength: 40,
-      onSave: (value) => {
-        if (!value) {
-          toast("نام نمی‌تواند خالی باشد.", "error");
-          renderCategories();
-          return;
-        }
-        runOperation(
-          () => updateCategory(category.id, { name: value }),
-          "نام دسته به‌روزرسانی شد."
-        );
-      },
-      onCancel: renderCategories,
-    });
-  }
+
 
   /* ---------- رویدادها ---------- */
   function bindEvents() {
@@ -559,13 +516,27 @@
     els.categoryModal.addEventListener("click", (event) => {
       if (event.target.closest("[data-close-modal]")) closeCategoryModal();
     });
+
+    /* مودال تأیید حذف */
+    els.confirmModal.addEventListener("click", (event) => {
+      if (event.target.closest("[data-close-confirm]")) closeConfirmModal();
+    });
+    els.confirmOk.addEventListener("click", () => {
+      const action = confirmAction;
+      closeConfirmModal();
+      if (action) action();
+    });
+
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !els.categoryModal.hidden) {
         closeCategoryModal();
       }
+      if (event.key === "Escape" && !els.confirmModal.hidden) {
+        closeConfirmModal();
+      }
     });
 
-    /* افزودن دسته */
+    /* افزودن / ویرایش دسته */
     els.categoryForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const name = els.categoryName.value.trim();
@@ -582,19 +553,28 @@
         toast("فقط کد SVG معتبر وارد کنید.", "error");
         return;
       }
-      if (data.categories.some((c) => c.label === name)) {
+      if (data.categories.some((c) => c.id !== editingCategoryId && c.label === name)) {
         toast("دسته‌ای با این نام وجود دارد.", "error");
         return;
       }
+
+      const editingId = editingCategoryId;
       closeCategoryModal();
       try {
-        const created = await createCategory(name, svg);
-        await refresh();
-        activeCategoryId = created.id;
-        renderAll();
-        toast(`دستهٔ «${name}» اضافه شد.`);
+        if (editingId) {
+          await updateCategory(editingId, { name, icon: svg });
+          await refresh();
+          renderAll();
+          toast(`دستهٔ «${name}» به‌روزرسانی شد.`);
+        } else {
+          const created = await createCategory(name, svg);
+          await refresh();
+          activeCategoryId = created.id;
+          renderAll();
+          toast(`دستهٔ «${name}» اضافه شد.`);
+        }
       } catch (err) {
-        toast(err.message || "خطا در افزودن دسته", "error", 4000);
+        toast(err.message || "خطا در ذخیرهٔ دسته", "error", 4000);
       }
     });
 
@@ -690,50 +670,6 @@
       }
     });
 
-    /* خروجی JSON */
-    els.exportBtn.addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "luce-menu-data.json";
-      document.body.append(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      toast("خروجی JSON دانلود شد.");
-    });
-
-    /* بازنشانی به پیش‌فرض — حذف همه از API و ساخت دوبارهٔ داده‌های نمونه */
-    els.resetBtn.addEventListener("click", async () => {
-      if (
-        !confirm(
-          "همهٔ تغییرات پاک می‌شود و داده‌ها به حالت پیش‌فرض برمی‌گردد. ادامه می‌دهم؟"
-        )
-      ) {
-        return;
-      }
-      els.resetBtn.disabled = true;
-      try {
-        for (const c of [...data.categories]) {
-          await removeCategory(c.id);
-        }
-        for (const cat of DEFAULT_CATEGORIES) {
-          const created = await createCategory(cat.label, cat.icon);
-          for (const name of DEFAULT_ITEMS[cat.id] || []) {
-            await createProduct(name, created.id);
-          }
-        }
-        await refresh();
-        toast("داده‌ها به حالت پیش‌فرض برگشت.");
-      } catch (err) {
-        toast(err.message || "خطا در بازنشانی داده‌ها", "error", 4000);
-      } finally {
-        els.resetBtn.disabled = false;
-      }
-    });
   }
 
   function switchTab(name) {

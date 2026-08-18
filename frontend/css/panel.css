@@ -39,7 +39,6 @@ body.panel-body {
   color: var(--brown-dark);
   background-color: var(--cream);
   min-height: 100vh;
-  padding-bottom: 10rem;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -373,6 +372,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-bottom: 3rem;
 }
 
 .list-item {
@@ -484,13 +484,66 @@ button {
   border-radius: var(--radius);
 }
 
-/* ---------- نوار پایین پنل ---------- */
+/* ---------- نوار پایین پنل (مدیریت یوزرها) ----------
+   خود فوتر فقط کانتینر است (بدون رنگ)؛ استایل‌ها روی جعبهٔ داخلش است */
 .panel-footer {
+  margin-bottom: 2rem;
+}
+
+/* فوتر خودش کانتینر است؛ جعبهٔ داخلش به‌عرض کارت‌ها می‌شود */
+.panel-footer__box {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-top: 1rem;
+  width: 100%;
+  background-color: var(--white);
+  border-radius: 2rem;
+  box-shadow: 0 -5px 10px 0px rgba(59, 37, 24, 0.1);
+  padding: 2rem;
+}
+
+/* حالت باریک: هر دو دکمه هم‌عرض با کمی فضای اضافه که متن هرگز نشکند — وسط خالی می‌ماند */
+.panel-footer__box .btn {
+  flex: 0 0 auto;
+  width: 14rem;
+}
+
+/* دکمهٔ افزودن مدیر (راست) — سبز */
+#add-manager-btn {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--white);
+}
+
+#add-manager-btn:hover {
+  background: #007a3a;
+  border-color: #007a3a;
+}
+
+/* دکمهٔ تغییر دادن رمز (چپ) — قرمز پر */
+#change-password-btn {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+}
+
+#change-password-btn:hover {
+  background: #a91f29;
+  border-color: #a91f29;
+}
+
+/* فقط وقتی صفحه به‌اندازهٔ کافی گشاد است که دکمه‌ها بدون شکستن متن جا شوند:
+   هر دکمه یک‌سوم عرض داخلی جعبه و فاصلهٔ وسط هم همان یک‌سوم */
+@media (min-width: 640px) {
+  .panel-footer__box .btn {
+    flex: 0 0 33.333%;
+    max-width: 33.333%;
+  }
+}
+
+.panel-body.is-locked .panel-footer {
+  display: none;
 }
 
 /* ---------- توست ---------- */
@@ -553,8 +606,7 @@ button {
 
 .panel-body.is-locked .panel-header,
 .panel-body.is-locked .tabs,
-.panel-body.is-locked .panel-main,
-.panel-body.is-locked .panel-footer {
+.panel-body.is-locked .panel-main {
   display: none;
 }
 
@@ -650,6 +702,11 @@ button {
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
+}
+
+.modal__text {
+  margin: 0 0 1.6rem;
+  color: var(--brown-dark);
 }
 
 .modal__form textarea.input {

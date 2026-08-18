@@ -11,6 +11,7 @@ const mongoose = require("mongoose");
 const { router: authRoutes, requireAuth } = require("./routes/auth");
 const categoryRoutes = require("./routes/categories");
 const productRoutes = require("./routes/products");
+const userRoutes = require("./routes/users");
 
 const app = express();
 
@@ -30,6 +31,9 @@ app.get("/", (req, res) => {
       "GET /api/products/:id": "یک محصول با شناسهٔ آن",
       "GET /api/categories": "لیست همهٔ دسته‌بندی‌ها",
       "POST /api/login": "ورود به پنل با رمز — توکن برمی‌گرداند",
+      "POST /api/users": "افزودن مدیر جدید (نیازمند توکن)",
+      "GET /api/users": "لیست مدیرها (نیازمند توکن)",
+      "PATCH /api/users/:username/password": "تغییر رمز (نیازمند توکن)",
     },
     "عملیات تغییر (POST/PATCH/DELETE)": "نیازمند هدر Authorization: Bearer <token> هستند",
   });
@@ -46,6 +50,9 @@ const protectWrites = (req, res, next) =>
 
 app.use("/api/categories", protectWrites, categoryRoutes);
 app.use("/api/products", protectWrites, productRoutes);
+
+/* مدیریت کاربران — همهٔ عملیات نیازمند توکن ورود هستند */
+app.use("/api/users", requireAuth, userRoutes);
 
 /* ---------- مسیرهای ناشناخته در /api ---------- */
 app.use("/api", (req, res) => {

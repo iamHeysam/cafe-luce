@@ -25,14 +25,14 @@ router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body || {};
 
-  if (typeof username !== "string" || typeof password !== "string") {
-    return res.status(401).json({ error: "رمز اشتباه است" });
-  }
+    if (typeof username !== "string" || typeof password !== "string") {
+      return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
+    }
 
-  const user = await User.findOne({ username: username.trim() });
-  if (!user || !user.verifyPassword(password)) {
-    return res.status(401).json({ error: "رمز اشتباه است" });
-  }
+    const user = await User.findOne({ username: username.trim() });
+    if (!user || !user.verifyPassword(password)) {
+      return res.status(401).json({ error: "نام کاربری یا رمز اشتباه است" });
+    }
 
     const token = crypto.randomBytes(32).toString("hex");
     await Token.create({
@@ -59,7 +59,6 @@ async function requireAuth(req, res, next) {
       if (found) await Token.deleteOne({ token });
       return res.status(401).json({ error: "برای این عملیات باید وارد شوید" });
     }
-    req.username = found.username;
     next();
   } catch {
     res.status(500).json({ error: "خطای سرور" });

@@ -61,7 +61,6 @@ cafe-luce/
 │   │   ├── shared/            ← ماژول‌های مشترک (تنظیمات و آیکون‌ها)
 │   │   ├── site/              ← منطق سایت عمومی
 │   │   └── panel/             ← منطق پنل (لایهٔ API + UI)
-│   └── vendor/                ← کتابخانه‌های طرف سوم
 │
 └── backend/                   ← REST API
     ├── server.js              ← نقطهٔ شروع: Express + اتصال MongoDB
